@@ -7,7 +7,6 @@ plugins {
 }
 
 group = "com.jder"
-version = "2.0.0"
 
 repositories {
     google()
@@ -29,9 +28,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Exe)
             packageName = "JDER"
-            packageVersion = "2.0.0"
             description = "Java Diagrammi E-R - Editor di diagrammi Entity-Relationship"
-            vendor = "JDER Team"
 
             windows {
                 menuGroup = "JDER"
