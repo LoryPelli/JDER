@@ -216,9 +216,6 @@ fun MainScreen(
                         showSaveAsDialog = true
                     }
                 },
-                onSaveAsDiagram = {
-                    showSaveAsDialog = true
-                },
                 onExportPNG = {
                     showExportDialog = true
                 },

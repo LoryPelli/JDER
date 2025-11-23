@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material.icons.filled.Redo
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.SaveAs
 import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material.icons.filled.ZoomOut
@@ -54,7 +53,6 @@ fun DiagramToolbar(
     onNewDiagram: () -> Unit,
     onOpenDiagram: () -> Unit,
     onSaveDiagram: () -> Unit,
-    onSaveAsDiagram: () -> Unit,
     onExportPNG: () -> Unit,
     onZoomIn: () -> Unit,
     onZoomOut: () -> Unit,
@@ -129,17 +127,6 @@ fun DiagramToolbar(
                                 }
                             },
                             leadingIcon = { Icon(Icons.Default.Save, null) }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Salva Come...") },
-                            onClick = {
-                                coroutineScope.launch {
-                                    delay(150)
-                                    showFileMenu = false
-                                    onSaveAsDiagram()
-                                }
-                            },
-                            leadingIcon = { Icon(Icons.Default.SaveAs, null) }
                         )
                         Divider()
                         DropdownMenuItem(
