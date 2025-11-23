@@ -1,5 +1,4 @@
 rootProject.name = "JDER"
-
 pluginManagement {
     repositories {
         google()
@@ -8,4 +7,3 @@ pluginManagement {
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
 }
-
