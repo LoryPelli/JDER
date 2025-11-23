@@ -16,33 +16,21 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.material.icons.filled.Computer
 import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FolderOpen
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.InsertDriveFile
-import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.SdStorage
-import androidx.compose.material.icons.filled.Storage
-import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -55,18 +43,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import java.io.File
 enum class FileManagerMode {
     SAVE, OPEN
 }
-data class QuickAccessFolder(
-    val name: String,
-    val file: File,
-    val icon: ImageVector
-)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FileManagerDialog(
@@ -81,36 +70,21 @@ fun FileManagerDialog(
     var fileName by remember { mutableStateOf("") }
     var selectedFile by remember { mutableStateOf<File?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    var showQuickAccessMenu by remember { mutableStateOf(false) }
+    var showInvalidPathDialog by remember { mutableStateOf(false) }
+    var invalidPathError by remember { mutableStateOf("") }
+    var pathInput by remember {
+        mutableStateOf(TextFieldValue(
+            text = currentDirectory.absolutePath,
+            selection = TextRange(currentDirectory.absolutePath.length)
+        ))
+    }
+    val pathFocusRequester = remember { FocusRequester() }
 
-    val quickAccessFolders = remember {
-        buildList {
-            val userHome = System.getProperty("user.home")
-            add(QuickAccessFolder("Home", File(userHome), Icons.Default.Home))
-            File(userHome, "Desktop").takeIf { it.exists() }?.let {
-                add(QuickAccessFolder("Desktop", it, Icons.Default.Computer))
-            }
-            File(userHome, "Documents").takeIf { it.exists() }?.let {
-                add(QuickAccessFolder("Documenti", it, Icons.Default.Description))
-            }
-            File(userHome, "Downloads").takeIf { it.exists() }?.let {
-                add(QuickAccessFolder("Download", it, Icons.Default.Download))
-            }
-            File(userHome, "Pictures").takeIf { it.exists() }?.let {
-                add(QuickAccessFolder("Immagini", it, Icons.Default.Image))
-            }
-            File(userHome, "Music").takeIf { it.exists() }?.let {
-                add(QuickAccessFolder("Musica", it, Icons.Default.MusicNote))
-            }
-            File(userHome, "Videos").takeIf { it.exists() }?.let {
-                add(QuickAccessFolder("Video", it, Icons.Default.VideoLibrary))
-            }
-            if (System.getProperty("os.name").lowercase().contains("win")) {
-                add(QuickAccessFolder("Disco C:", File("C:\\"), Icons.Default.SdStorage))
-            } else {
-                add(QuickAccessFolder("Root", File("/"), Icons.Default.Storage))
-            }
-        }
+    LaunchedEffect(currentDirectory) {
+        pathInput = TextFieldValue(
+            text = currentDirectory.absolutePath,
+            selection = TextRange(currentDirectory.absolutePath.length)
+        )
     }
     LaunchedEffect(currentDirectory) {
         if (!currentDirectory.exists() || !currentDirectory.isDirectory) {
@@ -154,106 +128,77 @@ fun FileManagerDialog(
                     ) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Cartella superiore")
                     }
-
-                    Box(modifier = Modifier.weight(1f)) {
-                        OutlinedButton(
-                            onClick = { showQuickAccessMenu = !showQuickAccessMenu },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Icon(
-                                Icons.Default.Folder,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = currentDirectory.absolutePath,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Icon(
-                                if (showQuickAccessMenu) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
-                                contentDescription = "Menu cartelle rapide"
-                            )
-                        }
-
-                        DropdownMenu(
-                            expanded = showQuickAccessMenu,
-                            onDismissRequest = { showQuickAccessMenu = false },
-                            modifier = Modifier.fillMaxWidth(0.85f)
-                        ) {
-                            Text(
-                                text = "Accesso rapido",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                            )
-                            quickAccessFolders.forEach { folder ->
-                                DropdownMenuItem(
-                                    text = {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                        ) {
-                                            Icon(
-                                                folder.icon,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(20.dp),
-                                                tint = MaterialTheme.colorScheme.primary
-                                            )
-                                            Column {
-                                                Text(
-                                                    text = folder.name,
-                                                    style = MaterialTheme.typography.bodyMedium
-                                                )
-                                                Text(
-                                                    text = folder.file.absolutePath,
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                            }
+                    OutlinedTextField(
+                        value = pathInput,
+                        onValueChange = { pathInput = it },
+                        modifier = Modifier
+                            .weight(1f)
+                            .focusRequester(pathFocusRequester)
+                            .onKeyEvent { keyEvent ->
+                                if (keyEvent.key == Key.Enter) {
+                                    val newPath = File(pathInput.text)
+                                    when {
+                                        !newPath.exists() -> {
+                                            invalidPathError = "Il percorso specificato non esiste."
+                                            showInvalidPathDialog = true
                                         }
-                                    },
-                                    onClick = {
-                                        if (folder.file.exists() && folder.file.canRead()) {
-                                            currentDirectory = folder.file
+                                        !newPath.isDirectory -> {
+                                            invalidPathError = "Il percorso specificato non è una cartella."
+                                            showInvalidPathDialog = true
+                                        }
+                                        !newPath.canRead() -> {
+                                            invalidPathError = "Non hai i permessi per accedere a questa cartella."
+                                            showInvalidPathDialog = true
+                                        }
+                                        else -> {
+                                            currentDirectory = newPath
                                             selectedFile = null
                                             fileName = ""
                                         }
-                                        showQuickAccessMenu = false
                                     }
-                                )
-                            }
-                            Divider(modifier = Modifier.padding(vertical = 8.dp))
-                            DropdownMenuItem(
-                                text = {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Folder,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Text("Cartella corrente")
-                                    }
-                                },
-                                onClick = { showQuickAccessMenu = false }
+                                    true
+                                } else {
+                                    false
+                                }
+                            },
+                        singleLine = true,
+                        label = { Text("Percorso") },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Folder,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
                             )
-                        }
-                    }
+                        },
+                        textStyle = MaterialTheme.typography.bodyMedium
+                    )
                     IconButton(
                         onClick = {
-                            selectedFile = null
+                            val newPath = File(pathInput.text)
+                            when {
+                                !newPath.exists() -> {
+                                    invalidPathError = "Il percorso specificato non esiste."
+                                    showInvalidPathDialog = true
+                                }
+                                !newPath.isDirectory -> {
+                                    invalidPathError = "Il percorso specificato non è una cartella."
+                                    showInvalidPathDialog = true
+                                }
+                                !newPath.canRead() -> {
+                                    invalidPathError = "Non hai i permessi per accedere a questa cartella."
+                                    showInvalidPathDialog = true
+                                }
+                                else -> {
+                                    currentDirectory = newPath
+                                    selectedFile = null
+                                    fileName = ""
+                                }
+                            }
                         }
                     ) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Aggiorna")
+                        Icon(Icons.Default.Refresh, contentDescription = "Vai al percorso")
                     }
                 }
-                Divider(modifier = Modifier.padding(vertical = 8.dp))
                 Box(
                     modifier = Modifier.weight(1f).fillMaxWidth()
                 ) {
@@ -403,6 +348,46 @@ fun FileManagerDialog(
                 }
             }
         }
+    }
+    if (showInvalidPathDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showInvalidPathDialog = false
+                val currentPath = currentDirectory.absolutePath
+                pathInput = TextFieldValue(
+                    text = currentPath,
+                    selection = TextRange(currentPath.length)
+                )
+            },
+            title = {
+                Text(
+                    text = "Percorso non valido",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = invalidPathError,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showInvalidPathDialog = false
+                        val currentPath = currentDirectory.absolutePath
+                        pathInput = TextFieldValue(
+                            text = currentPath,
+                            selection = TextRange(currentPath.length)
+                        )
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            shape = RoundedCornerShape(28.dp)
+        )
     }
 }
 @Composable
