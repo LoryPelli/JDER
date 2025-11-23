@@ -24,25 +24,6 @@ dependencies {
 compose.desktop {
     application {
         mainClass = "com.jder.MainKt"
-
-        nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Exe)
-            packageName = "JDER"
-            description = "Java Diagrammi E-R - Editor di diagrammi Entity-Relationship"
-
-            windows {
-                menuGroup = "JDER"
-                upgradeUuid = "BF5E4F2A-4F3B-4F3B-8F3B-4F3B4F3B4F3B"
-            }
-
-            macOS {
-                bundleID = "com.jder.app"
-            }
-
-            linux {
-                packageName = "jder"
-            }
-        }
     }
 }
 

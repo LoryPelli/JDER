@@ -32,7 +32,7 @@ fun main() = application {
                 exitApplication()
             }
         },
-        title = "JDER - Java Diagrammi E-R",
+        title = "JDER - Java Diagrammi E/R",
         state = windowState
     ) {
         JDERTheme {
