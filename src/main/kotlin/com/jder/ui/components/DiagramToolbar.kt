@@ -85,7 +85,6 @@ fun DiagramToolbar(
                 var showFileMenu by remember { mutableStateOf(false) }
                 var showExportMenu by remember { mutableStateOf(false) }
                 var showViewMenu by remember { mutableStateOf(false) }
-
                 Box {
                     TextButton(onClick = { showFileMenu = true }) {
                         Text("File")

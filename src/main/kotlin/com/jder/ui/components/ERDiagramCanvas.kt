@@ -404,7 +404,6 @@ private fun DrawScope.drawAttribute(
     val normalAttributeColor = Color(0xFF90CAF9)
     val primaryKeyColor = Color(0xFFFFEB3B)
     val compositeColor = Color(0xFFFFA726)
-
     drawLine(
         color = textColor.copy(alpha = 0.4f),
         start = connectionPoint,
@@ -579,7 +578,6 @@ private fun DrawScope.drawAttributeComponent(
     val compositeColor = Color(0xFFFFA726)
     val componentColor = Color(0xFFFFCC80)
     val attributeBackgroundColor = Color(0xFF424242)
-
     drawLine(
         color = compositeColor.copy(alpha = 0.4f),
         start = Offset(parentX, parentY),
@@ -641,7 +639,6 @@ private fun DrawScope.drawConnectionsForRelationship(
     val centerX = relationship.x + relationship.width / 2
     val centerY = relationship.y + relationship.height / 2
     val cardinalityColor = Color(0xFFFFEB3B)
-
     relationship.connections.forEach { connection ->
         val entity = entities.find { it.id == connection.entityId }
         if (entity != null) {
@@ -909,7 +906,6 @@ private fun isPointInDiamond(point: Offset, relationship: Relationship): Boolean
     val dy = kotlin.math.abs(point.y - centerY) / (relationship.height / 2)
     return (dx + dy) <= 1.0
 }
-
 private fun calculateAttributePosition(
     entityX: Float,
     entityY: Float,
@@ -931,7 +927,6 @@ private fun calculateAttributePosition(
     val attrY = startY + (index * verticalSpacing)
     return Offset(attrX, attrY)
 }
-
 private fun getClosestPointOnRectangle(
     rectX: Float,
     rectY: Float,
@@ -952,7 +947,6 @@ private fun getClosestPointOnRectangle(
         centerY + dy * scale
     )
 }
-
 private fun getClosestPointOnDiamond(
     centerX: Float,
     centerY: Float,
@@ -971,4 +965,3 @@ private fun getClosestPointOnDiamond(
         centerY + dy * totalScale
     )
 }
-
