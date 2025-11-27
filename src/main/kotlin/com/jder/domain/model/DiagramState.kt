@@ -200,8 +200,12 @@ class DiagramState {
     }
     fun addConnection(relationshipId: String, entityId: String, cardinality: Cardinality) {
         updateRelationship(relationshipId) { relationship ->
-            val connection = Connection(entityId = entityId, cardinality = cardinality)
-            relationship.copy(connections = relationship.connections + connection)
+            if (relationship.connections.any { it.entityId == entityId }) {
+                relationship
+            } else {
+                val connection = Connection(entityId = entityId, cardinality = cardinality)
+                relationship.copy(connections = relationship.connections + connection)
+            }
         }
     }
     fun deleteConnection(relationshipId: String, entityId: String) {
@@ -211,15 +215,19 @@ class DiagramState {
     }
     fun updateConnection(relationshipId: String, oldEntityId: String, newEntityId: String, newCardinality: Cardinality) {
         updateRelationship(relationshipId) { relationship ->
-            relationship.copy(
-                connections = relationship.connections.map { conn ->
-                    if (conn.entityId == oldEntityId) {
-                        Connection(entityId = newEntityId, cardinality = newCardinality)
-                    } else {
-                        conn
+            if (newEntityId != oldEntityId && relationship.connections.any { it.entityId == newEntityId }) {
+                relationship
+            } else {
+                relationship.copy(
+                    connections = relationship.connections.map { conn ->
+                        if (conn.entityId == oldEntityId) {
+                            Connection(entityId = newEntityId, cardinality = newCardinality)
+                        } else {
+                            conn
+                        }
                     }
-                }
-            )
+                )
+            }
         }
     }
     fun selectEntity(entityId: String?) {

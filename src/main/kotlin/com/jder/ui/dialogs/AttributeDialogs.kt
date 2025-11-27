@@ -1,4 +1,9 @@
 package com.jder.ui.dialogs
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -99,7 +104,11 @@ private fun AttributeDialog(
                         enabled = attributeType != AttributeType.KEY
                     )
                 }
-                if (attributeType == AttributeType.KEY) {
+                AnimatedVisibility(
+                    visible = attributeType == AttributeType.KEY,
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut()
+                ) {
                     Text(
                         text = "Gli attributi di tipo Chiave sono sempre chiavi primarie",
                         style = MaterialTheme.typography.bodySmall,
@@ -167,7 +176,11 @@ private fun AttributeDialog(
                         )
                     }
                 }
-                if (attributeType == AttributeType.MULTIVALUED) {
+                AnimatedVisibility(
+                    visible = attributeType == AttributeType.MULTIVALUED,
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut()
+                ) {
                     OutlinedTextField(
                         value = multiplicity,
                         onValueChange = { multiplicity = it },
@@ -176,66 +189,75 @@ private fun AttributeDialog(
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
-                if (attributeType == AttributeType.COMPOSITE) {
-                    Divider()
-                    Row(
+                AnimatedVisibility(
+                    visible = attributeType == AttributeType.COMPOSITE,
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut()
+                ) {
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Text(
-                            "Componenti (${components.size})",
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                        IconButton(onClick = { showAddComponentDialog = true }) {
-                            Icon(Icons.Default.Add, "Aggiungi componente")
-                        }
-                    }
-                    if (components.isNotEmpty()) {
-                        Column(
+                        Divider()
+                        Row(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
                         ) {
-                            components.forEach { component ->
-                                Card(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.secondaryContainer
-                                    )
-                                ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(8.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            component.name,
-                                            style = MaterialTheme.typography.bodyMedium
+                            Text(
+                                "Componenti (${components.size})",
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                            IconButton(onClick = { showAddComponentDialog = true }) {
+                                Icon(Icons.Default.Add, "Aggiungi componente")
+                            }
+                        }
+                        if (components.isNotEmpty()) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                components.forEach { component ->
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = MaterialTheme.colorScheme.secondaryContainer
                                         )
-                                        IconButton(
-                                            onClick = {
-                                                components = components.filter { it.id != component.id }
-                                            }
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(8.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
                                         ) {
-                                            Icon(
-                                                Icons.Default.Delete,
-                                                "Rimuovi componente",
-                                                tint = MaterialTheme.colorScheme.error
+                                            Text(
+                                                component.name,
+                                                style = MaterialTheme.typography.bodyMedium
                                             )
+                                            IconButton(
+                                                onClick = {
+                                                    components = components.filter { it.id != component.id }
+                                                }
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.Delete,
+                                                    "Rimuovi componente",
+                                                    tint = MaterialTheme.colorScheme.error
+                                                )
+                                            }
                                         }
                                     }
                                 }
                             }
+                        } else {
+                            Text(
+                                "Nessun componente. Aggiungi componenti per l'attributo composto.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
                         }
-                    } else {
-                        Text(
-                            "Nessun componente. Aggiungi componenti per l'attributo composto.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
                     }
                 }
             }

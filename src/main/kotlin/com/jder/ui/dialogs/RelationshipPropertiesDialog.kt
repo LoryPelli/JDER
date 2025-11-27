@@ -54,7 +54,8 @@ fun RelationshipPropertiesDialog(
                         name = name,
                         documentation = documentation
                     ))
-                }
+                },
+                enabled = name.isNotBlank()
             ) {
                 Text("Salva")
             }

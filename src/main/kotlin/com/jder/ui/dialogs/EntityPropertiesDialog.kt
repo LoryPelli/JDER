@@ -68,7 +68,8 @@ fun EntityPropertiesDialog(
                         isWeak = isWeak,
                         documentation = documentation
                     ))
-                }
+                },
+                enabled = name.isNotBlank()
             ) {
                 Text("Salva")
             }

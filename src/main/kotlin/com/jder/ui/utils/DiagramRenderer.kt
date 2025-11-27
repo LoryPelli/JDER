@@ -70,13 +70,37 @@ fun renderDiagramToBitmap(diagram: ERDiagram): ImageBitmap {
         val textWidth = fm.stringWidth(entity.name)
         g2d.drawString(entity.name, x + (w - textWidth) / 2, y + h / 2 + fm.ascent / 2)
         entity.attributes.forEachIndexed { index, attribute ->
-            val attrX = (entity.x + entity.width + offsetX + 50).toInt()
+            val arrowLength = 60
             val verticalSpacing = 45
-            val offsetY2 = (index - entity.attributes.size / 2f) * verticalSpacing
-            val attrY = (entity.y + entity.height / 2 + offsetY + offsetY2).toInt()
+            val centerX = entity.x + entity.width / 2
+            val centerY = entity.y + entity.height / 2
+            val startY = centerY - ((entity.attributes.size - 1) * verticalSpacing / 2f)
+            val defaultAttrX = entity.x + entity.width + arrowLength
+            val defaultAttrY = startY + (index * verticalSpacing)
+            val attrX = if (attribute.x != 0f) (centerX + attribute.x + offsetX).toInt() else (defaultAttrX + offsetX).toInt()
+            val attrY = if (attribute.y != 0f) (centerY + attribute.y + offsetY).toInt() else (defaultAttrY + offsetY).toInt()
             val radius = 20
+            val entityCenterX = (centerX + offsetX).toInt()
+            val entityCenterY = (centerY + offsetY).toInt()
+            val dx = attrX - entityCenterX
+            val dy = attrY - entityCenterY
+            val distance = kotlin.math.sqrt((dx * dx + dy * dy).toDouble())
+            val dirX = if (distance > 0) dx / distance else 1.0
+            val dirY = if (distance > 0) dy / distance else 0.0
+            val arrowStartX = (attrX - dirX * arrowLength).toInt()
+            val arrowStartY = (attrY - dirY * arrowLength).toInt()
+            val halfWidth = entity.width / 2
+            val halfHeight = entity.height / 2
+            val dxToStart = arrowStartX - entityCenterX
+            val dyToStart = arrowStartY - entityCenterY
+            val scaleX = if (dxToStart != 0) halfWidth / kotlin.math.abs(dxToStart) else Float.MAX_VALUE
+            val scaleY = if (dyToStart != 0) halfHeight / kotlin.math.abs(dyToStart) else Float.MAX_VALUE
+            val scale = kotlin.math.min(scaleX, scaleY)
+            val connectionX = (entityCenterX + dxToStart * scale).toInt()
+            val connectionY = (entityCenterY + dyToStart * scale).toInt()
             g2d.color = Color(0xBDBDBD)
-            g2d.drawLine(x + w, y + h / 2, attrX, attrY)
+            g2d.stroke = BasicStroke(2f)
+            g2d.drawLine(connectionX, connectionY, attrX, attrY)
             g2d.color = Color.WHITE
             g2d.fillOval(attrX - radius, attrY - radius, radius * 2, radius * 2)
             val attrColor = when {
@@ -117,6 +141,47 @@ fun renderDiagramToBitmap(diagram: ERDiagram): ImageBitmap {
         val fm = g2d.fontMetrics
         val textWidth = fm.stringWidth(relationship.name)
         g2d.drawString(relationship.name, centerX - textWidth / 2, centerY + fm.ascent / 2)
+        relationship.attributes.forEachIndexed { index, attribute ->
+            val arrowLength = 60
+            val verticalSpacing = 45
+            val relCenterX = relationship.x + relationship.width / 2
+            val relCenterY = relationship.y + relationship.height / 2
+            val startY = relCenterY - ((relationship.attributes.size - 1) * verticalSpacing / 2f)
+            val defaultAttrX = relationship.x + relationship.width + arrowLength
+            val defaultAttrY = startY + (index * verticalSpacing)
+            val attrX = if (attribute.x != 0f) (relCenterX + attribute.x + offsetX).toInt() else (defaultAttrX + offsetX).toInt()
+            val attrY = if (attribute.y != 0f) (relCenterY + attribute.y + offsetY).toInt() else (defaultAttrY + offsetY).toInt()
+            val radius = 20
+            val dx = attrX - centerX
+            val dy = attrY - centerY
+            val distance = kotlin.math.sqrt((dx * dx + dy * dy).toDouble())
+            val dirX = if (distance > 0) dx / distance else 1.0
+            val dirY = if (distance > 0) dy / distance else 0.0
+            val arrowStartX = (attrX - dirX * arrowLength).toInt()
+            val arrowStartY = (attrY - dirY * arrowLength).toInt()
+            val dxToStart = arrowStartX - centerX
+            val dyToStart = arrowStartY - centerY
+            val halfWidth2 = relationship.width / 2f
+            val halfHeight2 = relationship.height / 2f
+            val totalScale = 1f / (kotlin.math.abs(dxToStart.toFloat()) / halfWidth2 + kotlin.math.abs(dyToStart.toFloat()) / halfHeight2)
+            val connectionX = (centerX + dxToStart * totalScale).toInt()
+            val connectionY = (centerY + dyToStart * totalScale).toInt()
+            g2d.color = Color(0xBDBDBD)
+            g2d.stroke = BasicStroke(2f)
+            g2d.drawLine(connectionX, connectionY, attrX, attrY)
+            g2d.color = Color.WHITE
+            g2d.fillOval(attrX - radius, attrY - radius, radius * 2, radius * 2)
+            val attrColor = when {
+                attribute.isPrimaryKey -> Color(0xFFEB3B)
+                attribute.type == AttributeType.COMPOSITE -> Color(0xFFA726)
+                else -> Color(0x90CAF9)
+            }
+            g2d.color = attrColor
+            g2d.drawOval(attrX - radius, attrY - radius, radius * 2, radius * 2)
+            g2d.font = Font("Arial", Font.BOLD, 12)
+            g2d.color = Color.BLACK
+            g2d.drawString(attribute.name, attrX + radius + 10, attrY + 5)
+        }
     }
     g2d.dispose()
     return bufferedImage.toComposeImageBitmap()

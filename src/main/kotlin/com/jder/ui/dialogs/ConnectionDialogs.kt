@@ -74,77 +74,86 @@ private fun ConnectionDialog(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                ExposedDropdownMenuBox(
-                    expanded = expandedEntity,
-                    onExpandedChange = { expandedEntity = it }
-                ) {
-                    OutlinedTextField(
-                        value = selectedEntity?.name ?: "",
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Entità") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedEntity) },
-                        modifier = Modifier.fillMaxWidth().menuAnchor()
+                if (entities.isEmpty()) {
+                    Text(
+                        text = "Nessuna entità disponibile. Tutte le entità sono già connesse a questa relazione.",
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    ExposedDropdownMenu(
+                } else {
+                    ExposedDropdownMenuBox(
                         expanded = expandedEntity,
-                        onDismissRequest = { expandedEntity = false }
+                        onExpandedChange = { expandedEntity = it }
                     ) {
-                        entities.forEach { entity ->
-                            DropdownMenuItem(
-                                text = { Text(entity.name) },
-                                onClick = {
-                                    selectedEntity = entity
-                                    expandedEntity = false
-                                }
-                            )
+                        OutlinedTextField(
+                            value = selectedEntity?.name ?: "",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Entità") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedEntity) },
+                            modifier = Modifier.fillMaxWidth().menuAnchor()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = expandedEntity,
+                            onDismissRequest = { expandedEntity = false }
+                        ) {
+                            entities.forEach { entity ->
+                                DropdownMenuItem(
+                                    text = { Text(entity.name) },
+                                    onClick = {
+                                        selectedEntity = entity
+                                        expandedEntity = false
+                                    }
+                                )
+                            }
                         }
                     }
-                }
-                ExposedDropdownMenuBox(
-                    expanded = expandedCardinality,
-                    onExpandedChange = { expandedCardinality = it }
-                ) {
-                    OutlinedTextField(
-                        value = selectedCardinality.display,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Cardinalità") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCardinality) },
-                        modifier = Modifier.fillMaxWidth().menuAnchor()
-                    )
-                    ExposedDropdownMenu(
+                    ExposedDropdownMenuBox(
                         expanded = expandedCardinality,
-                        onDismissRequest = { expandedCardinality = false }
+                        onExpandedChange = { expandedCardinality = it }
                     ) {
-                        Cardinality.entries.forEach { cardinality ->
-                            DropdownMenuItem(
-                                text = { Text(cardinality.display) },
-                                onClick = {
-                                    selectedCardinality = cardinality
-                                    expandedCardinality = false
-                                }
-                            )
+                        OutlinedTextField(
+                            value = selectedCardinality.display,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Cardinalità") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCardinality) },
+                            modifier = Modifier.fillMaxWidth().menuAnchor()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = expandedCardinality,
+                            onDismissRequest = { expandedCardinality = false }
+                        ) {
+                            Cardinality.entries.forEach { cardinality ->
+                                DropdownMenuItem(
+                                    text = { Text(cardinality.display) },
+                                    onClick = {
+                                        selectedCardinality = cardinality
+                                        expandedCardinality = false
+                                    }
+                                )
+                            }
                         }
                     }
                 }
             }
         },
         confirmButton = {
-            Button(
-                onClick = {
-                    selectedEntity?.let { entity ->
-                        onConfirm(entity.id, selectedCardinality)
-                    }
-                },
-                enabled = selectedEntity != null
-            ) {
-                Text(if (initialEntityId != null) "Salva" else "Crea")
+            if (entities.isNotEmpty()) {
+                Button(
+                    onClick = {
+                        selectedEntity?.let { entity ->
+                            onConfirm(entity.id, selectedCardinality)
+                        }
+                    },
+                    enabled = selectedEntity != null
+                ) {
+                    Text(if (initialEntityId != null) "Salva" else "Crea")
+                }
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Annulla")
+                Text(if (entities.isEmpty()) "Chiudi" else "Annulla")
             }
         }
     )

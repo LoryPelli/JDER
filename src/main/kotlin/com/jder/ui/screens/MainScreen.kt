@@ -400,8 +400,11 @@ fun MainScreen(
         )
     }
     if (showCreateConnectionDialog && state.selectedRelationshipId != null) {
+        val selectedRelationship = state.diagram.relationships.find { it.id == state.selectedRelationshipId }
+        val connectedEntityIds = selectedRelationship?.connections?.map { it.entityId }?.toSet() ?: emptySet()
+        val availableEntities = state.diagram.entities.filter { it.id !in connectedEntityIds }
         CreateConnectionDialog(
-            entities = state.diagram.entities,
+            entities = availableEntities,
             onDismiss = { showCreateConnectionDialog = false },
             onCreate = { entityId, cardinality ->
                 state.addConnection(state.selectedRelationshipId!!, entityId, cardinality)
@@ -411,8 +414,14 @@ fun MainScreen(
         )
     }
     if (showEditConnectionDialog && connectionToEdit != null && state.selectedRelationshipId != null) {
+        val selectedRelationship = state.diagram.relationships.find { it.id == state.selectedRelationshipId }
+        val connectedEntityIds = selectedRelationship?.connections
+            ?.map { it.entityId }
+            ?.filter { it != connectionToEdit!!.first }
+            ?.toSet() ?: emptySet()
+        val availableEntities = state.diagram.entities.filter { it.id !in connectedEntityIds }
         EditConnectionDialog(
-            entities = state.diagram.entities,
+            entities = availableEntities,
             currentEntityId = connectionToEdit!!.first,
             currentCardinality = connectionToEdit!!.second.cardinality,
             onDismiss = {

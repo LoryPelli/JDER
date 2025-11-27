@@ -49,6 +49,7 @@ fun ERDiagramCanvas(
     val connectionColor = MaterialTheme.colorScheme.outline
     val gridColor = MaterialTheme.colorScheme.surfaceVariant
     var isDragging by remember { mutableStateOf(false) }
+    var draggedAttributeInfo by remember { mutableStateOf<Triple<String?, String?, String?>>(Triple(null, null, null)) }
     Canvas(
         modifier = modifier
             .fillMaxSize()
@@ -140,15 +141,16 @@ fun ERDiagramCanvas(
                 detectDragGestures(
                     onDragStart = { offset ->
                         isDragging = false
-                        handleDragStart(state, offset)
+                        draggedAttributeInfo = handleDragStart(state, offset)
                     },
                     onDrag = { change, dragAmount ->
                         change.consume()
                         isDragging = true
-                        handleDrag(state, dragAmount)
+                        handleDrag(state, dragAmount, draggedAttributeInfo.first, draggedAttributeInfo.second, draggedAttributeInfo.third)
                     },
                     onDragEnd = {
                         isDragging = false
+                        draggedAttributeInfo = Triple(null, null, null)
                     }
                 )
             }
@@ -279,12 +281,15 @@ private fun DrawScope.drawEntity(
         entity.attributes.forEachIndexed { index, attribute ->
             drawAttribute(
                 attribute = attribute,
-                parentX = entity.x + entity.width,
-                parentY = entity.y + entity.height / 2,
+                entityX = entity.x,
+                entityY = entity.y,
+                entityWidth = entity.width,
+                entityHeight = entity.height,
                 index = index,
                 total = entity.attributes.size,
                 textMeasurer = textMeasurer,
-                textColor = textColor
+                textColor = textColor,
+                isRectangle = true
             )
         }
     }
@@ -348,31 +353,53 @@ private fun DrawScope.drawRelationship(
         relationship.attributes.forEachIndexed { index, attribute ->
             drawAttribute(
                 attribute = attribute,
-                parentX = relationship.x + relationship.width,
-                parentY = centerY,
+                entityX = relationship.x,
+                entityY = relationship.y,
+                entityWidth = relationship.width,
+                entityHeight = relationship.height,
                 index = index,
                 total = relationship.attributes.size,
                 textMeasurer = textMeasurer,
-                textColor = textColor
+                textColor = textColor,
+                isRectangle = false
             )
         }
     }
 }
 private fun DrawScope.drawAttribute(
     attribute: Attribute,
-    parentX: Float,
-    parentY: Float,
+    entityX: Float,
+    entityY: Float,
+    entityWidth: Float,
+    entityHeight: Float,
     index: Int,
     total: Int,
     textMeasurer: TextMeasurer,
-    textColor: Color
+    textColor: Color,
+    isRectangle: Boolean
 ) {
     val radius = 20f
-    val horizontalSpacing = 60f
+    val arrowLength = 60f
     val verticalSpacing = 60f
-    val startY = parentY - ((total - 1) * verticalSpacing / 2f)
-    val attrX = parentX + horizontalSpacing
-    val attrY = startY + (index * verticalSpacing)
+    val centerX = entityX + entityWidth / 2
+    val centerY = entityY + entityHeight / 2
+    val startY = centerY - ((total - 1) * verticalSpacing / 2f)
+    val defaultAttrX = entityX + entityWidth + arrowLength
+    val defaultAttrY = startY + (index * verticalSpacing)
+    val attrX = if (attribute.x != 0f) centerX + attribute.x else defaultAttrX
+    val attrY = if (attribute.y != 0f) centerY + attribute.y else defaultAttrY
+    val dx = attrX - centerX
+    val dy = attrY - centerY
+    val distance = kotlin.math.sqrt(dx * dx + dy * dy)
+    val dirX = if (distance > 0) dx / distance else 1f
+    val dirY = if (distance > 0) dy / distance else 0f
+    val arrowStartX = attrX - dirX * arrowLength
+    val arrowStartY = attrY - dirY * arrowLength
+    val connectionPoint = if (isRectangle) {
+        getClosestPointOnRectangle(entityX, entityY, entityWidth, entityHeight, arrowStartX, arrowStartY)
+    } else {
+        getClosestPointOnDiamond(centerX, centerY, entityWidth, entityHeight, arrowStartX, arrowStartY)
+    }
     val attributeBackgroundColor = Color(0xFF424242)
     val normalAttributeColor = Color(0xFF90CAF9)
     val primaryKeyColor = Color(0xFFFFEB3B)
@@ -380,7 +407,7 @@ private fun DrawScope.drawAttribute(
 
     drawLine(
         color = textColor.copy(alpha = 0.4f),
-        start = Offset(parentX, parentY),
+        start = connectionPoint,
         end = Offset(attrX, attrY),
         strokeWidth = 1.5f
     )
@@ -697,37 +724,180 @@ private fun handleCanvasTap(state: DiagramState, offset: Offset) {
         }
     }
 }
-private fun handleDragStart(state: DiagramState, offset: Offset) {
+private fun handleDragStart(state: DiagramState, offset: Offset): Triple<String?, String?, String?> {
+    val adjustedOffset = Offset(
+        (offset.x - state.panOffset.x) / state.zoom,
+        (offset.y - state.panOffset.y) / state.zoom
+    )
+    state.diagram.entities.forEach { entity ->
+        entity.attributes.forEachIndexed { index, attribute ->
+            val attrPos = calculateAttributePosition(
+                entity.x,
+                entity.y,
+                entity.width,
+                entity.height,
+                index,
+                entity.attributes.size,
+                attribute
+            )
+            val distance = kotlin.math.sqrt(
+                (adjustedOffset.x - attrPos.x).let { it * it } +
+                (adjustedOffset.y - attrPos.y).let { it * it }
+            )
+            if (distance <= 20f) {
+                state.selectEntity(entity.id)
+                state.saveDragStartState()
+                return Triple(attribute.id, entity.id, null)
+            }
+        }
+    }
+    state.diagram.relationships.forEach { rel ->
+        rel.attributes.forEachIndexed { index, attribute ->
+            val attrPos = calculateAttributePosition(
+                rel.x,
+                rel.y,
+                rel.width,
+                rel.height,
+                index,
+                rel.attributes.size,
+                attribute
+            )
+            val distance = kotlin.math.sqrt(
+                (adjustedOffset.x - attrPos.x).let { it * it } +
+                (adjustedOffset.y - attrPos.y).let { it * it }
+            )
+            if (distance <= 20f) {
+                state.selectRelationship(rel.id)
+                state.saveDragStartState()
+                return Triple(attribute.id, null, rel.id)
+            }
+        }
+    }
     val entity = state.diagram.entities.find { entity ->
-        offset.x >= entity.x && offset.x <= entity.x + entity.width &&
-        offset.y >= entity.y && offset.y <= entity.y + entity.height
+        adjustedOffset.x >= entity.x && adjustedOffset.x <= entity.x + entity.width &&
+        adjustedOffset.y >= entity.y && adjustedOffset.y <= entity.y + entity.height
     }
     if (entity != null) {
         state.selectEntity(entity.id)
         state.saveDragStartState()
+        return Triple(null, null, null)
     }
     val relationship = state.diagram.relationships.find { rel ->
-        isPointInDiamond(Offset(offset.x, offset.y), rel)
+        isPointInDiamond(adjustedOffset, rel)
     }
     if (relationship != null) {
         state.selectRelationship(relationship.id)
         state.saveDragStartState()
+        return Triple(null, null, null)
     }
+    return Triple(null, null, null)
 }
-private fun handleDrag(state: DiagramState, dragAmount: Offset) {
+private fun handleDrag(
+    state: DiagramState,
+    dragAmount: Offset,
+    draggedAttributeId: String?,
+    draggedAttributeForEntity: String?,
+    draggedAttributeForRelationship: String?
+) {
+    if (draggedAttributeId != null && draggedAttributeForEntity != null) {
+        state.updateEntityWithoutSave(draggedAttributeForEntity) { entity ->
+            entity.copy(
+                attributes = entity.attributes.mapIndexed { index, attr ->
+                    if (attr.id == draggedAttributeId) {
+                        val centerX = entity.x + entity.width / 2
+                        val centerY = entity.y + entity.height / 2
+                        val currentAttrX = if (attr.x == 0f && attr.y == 0f) {
+                            val arrowLength = 60f
+                            entity.x + entity.width + arrowLength
+                        } else {
+                            centerX + attr.x
+                        }
+                        val currentAttrY = if (attr.x == 0f && attr.y == 0f) {
+                            val verticalSpacing = 60f
+                            val startY = centerY - ((entity.attributes.size - 1) * verticalSpacing / 2f)
+                            startY + (index * verticalSpacing)
+                        } else {
+                            centerY + attr.y
+                        }
+                        val currentDx = currentAttrX - centerX
+                        val currentDy = currentAttrY - centerY
+                        val currentDistanceFromCenter = kotlin.math.sqrt(currentDx * currentDx + currentDy * currentDy)
+                        val fixedDistance = if (currentDistanceFromCenter > 0) currentDistanceFromCenter else (entity.width / 2 + 60f)
+                        val newAttrX = currentAttrX + dragAmount.x / state.zoom
+                        val newAttrY = currentAttrY + dragAmount.y / state.zoom
+                        val dx = newAttrX - centerX
+                        val dy = newAttrY - centerY
+                        val currentDistance = kotlin.math.sqrt(dx * dx + dy * dy)
+                        val normalizedX = if (currentDistance > 0) dx / currentDistance else 1f
+                        val normalizedY = if (currentDistance > 0) dy / currentDistance else 0f
+                        attr.copy(
+                            x = normalizedX * fixedDistance,
+                            y = normalizedY * fixedDistance
+                        )
+                    } else {
+                        attr
+                    }
+                }
+            )
+        }
+        return
+    }
+    if (draggedAttributeId != null && draggedAttributeForRelationship != null) {
+        state.updateRelationshipWithoutSave(draggedAttributeForRelationship) { rel ->
+            rel.copy(
+                attributes = rel.attributes.mapIndexed { index, attr ->
+                    if (attr.id == draggedAttributeId) {
+                        val centerX = rel.x + rel.width / 2
+                        val centerY = rel.y + rel.height / 2
+                        val currentAttrX = if (attr.x == 0f && attr.y == 0f) {
+                            val arrowLength = 60f
+                            rel.x + rel.width + arrowLength
+                        } else {
+                            centerX + attr.x
+                        }
+                        val currentAttrY = if (attr.x == 0f && attr.y == 0f) {
+                            val verticalSpacing = 60f
+                            val startY = centerY - ((rel.attributes.size - 1) * verticalSpacing / 2f)
+                            startY + (index * verticalSpacing)
+                        } else {
+                            centerY + attr.y
+                        }
+                        val currentDx = currentAttrX - centerX
+                        val currentDy = currentAttrY - centerY
+                        val currentDistanceFromCenter = kotlin.math.sqrt(currentDx * currentDx + currentDy * currentDy)
+                        val fixedDistance = if (currentDistanceFromCenter > 0) currentDistanceFromCenter else (rel.width / 2 + 60f)
+                        val newAttrX = currentAttrX + dragAmount.x / state.zoom
+                        val newAttrY = currentAttrY + dragAmount.y / state.zoom
+                        val dx = newAttrX - centerX
+                        val dy = newAttrY - centerY
+                        val currentDistance = kotlin.math.sqrt(dx * dx + dy * dy)
+                        val normalizedX = if (currentDistance > 0) dx / currentDistance else 1f
+                        val normalizedY = if (currentDistance > 0) dy / currentDistance else 0f
+                        attr.copy(
+                            x = normalizedX * fixedDistance,
+                            y = normalizedY * fixedDistance
+                        )
+                    } else {
+                        attr
+                    }
+                }
+            )
+        }
+        return
+    }
     state.selectedEntityId?.let { entityId ->
         state.updateEntityWithoutSave(entityId) { entity ->
             entity.copy(
-                x = entity.x + dragAmount.x,
-                y = entity.y + dragAmount.y
+                x = entity.x + dragAmount.x / state.zoom,
+                y = entity.y + dragAmount.y / state.zoom
             )
         }
     }
     state.selectedRelationshipId?.let { relId ->
         state.updateRelationshipWithoutSave(relId) { rel ->
             rel.copy(
-                x = rel.x + dragAmount.x,
-                y = rel.y + dragAmount.y
+                x = rel.x + dragAmount.x / state.zoom,
+                y = rel.y + dragAmount.y / state.zoom
             )
         }
     }
@@ -739,3 +909,66 @@ private fun isPointInDiamond(point: Offset, relationship: Relationship): Boolean
     val dy = kotlin.math.abs(point.y - centerY) / (relationship.height / 2)
     return (dx + dy) <= 1.0
 }
+
+private fun calculateAttributePosition(
+    entityX: Float,
+    entityY: Float,
+    entityWidth: Float,
+    entityHeight: Float,
+    index: Int,
+    total: Int,
+    attribute: Attribute
+): Offset {
+    val centerX = entityX + entityWidth / 2
+    val centerY = entityY + entityHeight / 2
+    if (attribute.x != 0f || attribute.y != 0f) {
+        return Offset(centerX + attribute.x, centerY + attribute.y)
+    }
+    val arrowLength = 60f
+    val verticalSpacing = 60f
+    val startY = centerY - ((total - 1) * verticalSpacing / 2f)
+    val attrX = entityX + entityWidth + arrowLength
+    val attrY = startY + (index * verticalSpacing)
+    return Offset(attrX, attrY)
+}
+
+private fun getClosestPointOnRectangle(
+    rectX: Float,
+    rectY: Float,
+    rectWidth: Float,
+    rectHeight: Float,
+    targetX: Float,
+    targetY: Float
+): Offset {
+    val centerX = rectX + rectWidth / 2
+    val centerY = rectY + rectHeight / 2
+    val dx = targetX - centerX
+    val dy = targetY - centerY
+    val scaleX = if (dx != 0f) (rectWidth / 2) / kotlin.math.abs(dx) else Float.MAX_VALUE
+    val scaleY = if (dy != 0f) (rectHeight / 2) / kotlin.math.abs(dy) else Float.MAX_VALUE
+    val scale = kotlin.math.min(scaleX, scaleY)
+    return Offset(
+        centerX + dx * scale,
+        centerY + dy * scale
+    )
+}
+
+private fun getClosestPointOnDiamond(
+    centerX: Float,
+    centerY: Float,
+    width: Float,
+    height: Float,
+    targetX: Float,
+    targetY: Float
+): Offset {
+    val dx = targetX - centerX
+    val dy = targetY - centerY
+    val halfWidth = width / 2
+    val halfHeight = height / 2
+    val totalScale = 1f / (kotlin.math.abs(dx) / halfWidth + kotlin.math.abs(dy) / halfHeight)
+    return Offset(
+        centerX + dx * totalScale,
+        centerY + dy * totalScale
+    )
+}
+
