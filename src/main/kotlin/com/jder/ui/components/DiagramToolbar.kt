@@ -44,12 +44,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.jder.domain.model.DiagramState
 import com.jder.domain.model.ToolMode
+import com.jder.ui.theme.ThemeState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiagramToolbar(
     state: DiagramState,
+    themeState: ThemeState,
     onNewDiagram: () -> Unit,
     onOpenDiagram: () -> Unit,
     onSaveDiagram: () -> Unit,
@@ -211,6 +213,11 @@ fun DiagramToolbar(
                         )
                     }
                 }
+                ThemeToggleButton(
+                    isDarkTheme = themeState.isDarkTheme,
+                    onToggle = { themeState.toggleTheme() },
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                )
             }
         )
         Surface(

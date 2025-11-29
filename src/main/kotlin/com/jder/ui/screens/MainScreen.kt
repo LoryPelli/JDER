@@ -48,11 +48,13 @@ import com.jder.ui.dialogs.EditConnectionDialog
 import com.jder.ui.dialogs.EntityPropertiesDialog
 import com.jder.ui.dialogs.RelationshipPropertiesDialog
 import com.jder.ui.utils.renderDiagramToBitmap
+import com.jder.ui.theme.ThemeState
 import java.io.File
 @Composable
 fun MainScreen(
     state: DiagramState = remember { DiagramState() },
-    repository: DiagramRepository = remember { DiagramRepository() }
+    repository: DiagramRepository = remember { DiagramRepository() },
+    themeState: ThemeState = remember { ThemeState() }
 ) {
     var showEntityDialog by remember { mutableStateOf(false) }
     var showRelationshipDialog by remember { mutableStateOf(false) }
@@ -173,6 +175,7 @@ fun MainScreen(
         topBar = {
             DiagramToolbar(
                 state = state,
+                themeState = themeState,
                 onNewDiagram = {
                     if (state.isModified) {
                         showNewDiagramConfirmDialog = true

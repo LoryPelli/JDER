@@ -10,15 +10,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import androidx.compose.foundation.isSystemInDarkTheme
 import com.jder.domain.model.DiagramState
 import com.jder.ui.screens.MainScreen
 import com.jder.ui.theme.JDERTheme
+import com.jder.ui.theme.ThemeState
 fun main() = application {
     val windowState = rememberWindowState(
         width = 1200.dp,
         height = 800.dp
     )
     val diagramState = remember { DiagramState() }
+    val isSystemInDark = isSystemInDarkTheme()
+    val themeState = remember { ThemeState(initialDarkTheme = isSystemInDark) }
     var showExitDialog by remember { mutableStateOf(false) }
     var shouldExit by remember { mutableStateOf(false) }
     if (shouldExit) {
@@ -35,8 +39,11 @@ fun main() = application {
         title = "JDER - Java Diagrammi E/R",
         state = windowState
     ) {
-        JDERTheme {
-            MainScreen(state = diagramState)
+        JDERTheme(darkTheme = themeState.isDarkTheme) {
+            MainScreen(
+                state = diagramState,
+                themeState = themeState
+            )
             if (showExitDialog) {
                 AlertDialog(
                     onDismissRequest = { showExitDialog = false },
