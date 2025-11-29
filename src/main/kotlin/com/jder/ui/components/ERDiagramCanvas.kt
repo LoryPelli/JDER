@@ -48,6 +48,13 @@ fun ERDiagramCanvas(
     val surfaceColor = MaterialTheme.colorScheme.surface
     val connectionColor = MaterialTheme.colorScheme.outline
     val gridColor = MaterialTheme.colorScheme.surfaceVariant
+    val attributeBackgroundColor = MaterialTheme.colorScheme.surfaceVariant
+    val normalAttributeColor = MaterialTheme.colorScheme.primary
+    val primaryKeyColor = MaterialTheme.colorScheme.tertiary
+    val compositeColor = MaterialTheme.colorScheme.secondary
+    val componentColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f)
+    val cardinalityColor = MaterialTheme.colorScheme.tertiary
+    val textBackgroundColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
     var isDragging by remember { mutableStateOf(false) }
     var draggedAttributeInfo by remember { mutableStateOf<Triple<String?, String?, String?>>(Triple(null, null, null)) }
     Canvas(
@@ -169,7 +176,9 @@ fun ERDiagramCanvas(
                     relationship = relationship,
                     entities = state.diagram.entities,
                     color = connectionColor,
-                    textMeasurer = textMeasurer
+                    textMeasurer = textMeasurer,
+                    cardinalityColor = cardinalityColor,
+                    textBackgroundColor = textBackgroundColor
                 )
             }
             state.diagram.entities.forEach { entity ->
@@ -182,7 +191,13 @@ fun ERDiagramCanvas(
                     selectedColor = selectedColor,
                     textColor = textColor,
                     surfaceColor = surfaceColor,
-                    textMeasurer = textMeasurer
+                    textMeasurer = textMeasurer,
+                    attributeBackgroundColor = attributeBackgroundColor,
+                    normalAttributeColor = normalAttributeColor,
+                    primaryKeyColor = primaryKeyColor,
+                    compositeColor = compositeColor,
+                    componentColor = componentColor,
+                    textBackgroundColor = textBackgroundColor
                 )
             }
             state.diagram.relationships.forEach { relationship ->
@@ -195,7 +210,13 @@ fun ERDiagramCanvas(
                     selectedColor = selectedColor,
                     textColor = textColor,
                     surfaceColor = surfaceColor,
-                    textMeasurer = textMeasurer
+                    textMeasurer = textMeasurer,
+                    attributeBackgroundColor = attributeBackgroundColor,
+                    normalAttributeColor = normalAttributeColor,
+                    primaryKeyColor = primaryKeyColor,
+                    compositeColor = compositeColor,
+                    componentColor = componentColor,
+                    textBackgroundColor = textBackgroundColor
                 )
             }
         }
@@ -229,7 +250,13 @@ private fun DrawScope.drawEntity(
     selectedColor: Color,
     textColor: Color,
     surfaceColor: Color,
-    textMeasurer: TextMeasurer
+    textMeasurer: TextMeasurer,
+    attributeBackgroundColor: Color,
+    normalAttributeColor: Color,
+    primaryKeyColor: Color,
+    compositeColor: Color,
+    componentColor: Color,
+    textBackgroundColor: Color
 ) {
     val color = if (isSelected) selectedColor else entityColor
     val strokeWidth = when {
@@ -289,7 +316,13 @@ private fun DrawScope.drawEntity(
                 total = entity.attributes.size,
                 textMeasurer = textMeasurer,
                 textColor = textColor,
-                isRectangle = true
+                isRectangle = true,
+                attributeBackgroundColor = attributeBackgroundColor,
+                normalAttributeColor = normalAttributeColor,
+                primaryKeyColor = primaryKeyColor,
+                compositeColor = compositeColor,
+                componentColor = componentColor,
+                textBackgroundColor = textBackgroundColor
             )
         }
     }
@@ -302,7 +335,13 @@ private fun DrawScope.drawRelationship(
     selectedColor: Color,
     textColor: Color,
     surfaceColor: Color,
-    textMeasurer: TextMeasurer
+    textMeasurer: TextMeasurer,
+    attributeBackgroundColor: Color,
+    normalAttributeColor: Color,
+    primaryKeyColor: Color,
+    compositeColor: Color,
+    componentColor: Color,
+    textBackgroundColor: Color
 ) {
     val color = if (isSelected) selectedColor else relationshipColor
     val strokeWidth = when {
@@ -361,7 +400,13 @@ private fun DrawScope.drawRelationship(
                 total = relationship.attributes.size,
                 textMeasurer = textMeasurer,
                 textColor = textColor,
-                isRectangle = false
+                isRectangle = false,
+                attributeBackgroundColor = attributeBackgroundColor,
+                normalAttributeColor = normalAttributeColor,
+                primaryKeyColor = primaryKeyColor,
+                compositeColor = compositeColor,
+                componentColor = componentColor,
+                textBackgroundColor = textBackgroundColor
             )
         }
     }
@@ -376,7 +421,13 @@ private fun DrawScope.drawAttribute(
     total: Int,
     textMeasurer: TextMeasurer,
     textColor: Color,
-    isRectangle: Boolean
+    isRectangle: Boolean,
+    attributeBackgroundColor: Color,
+    normalAttributeColor: Color,
+    primaryKeyColor: Color,
+    compositeColor: Color,
+    componentColor: Color,
+    textBackgroundColor: Color
 ) {
     val radius = 20f
     val arrowLength = 60f
@@ -400,10 +451,6 @@ private fun DrawScope.drawAttribute(
     } else {
         getClosestPointOnDiamond(centerX, centerY, entityWidth, entityHeight, arrowStartX, arrowStartY)
     }
-    val attributeBackgroundColor = Color(0xFF424242)
-    val normalAttributeColor = Color(0xFF90CAF9)
-    val primaryKeyColor = Color(0xFFFFEB3B)
-    val compositeColor = Color(0xFFFFA726)
     drawLine(
         color = textColor.copy(alpha = 0.4f),
         start = connectionPoint,
@@ -438,7 +485,11 @@ private fun DrawScope.drawAttribute(
                         parentY = attrY,
                         index = compIndex,
                         total = attribute.components.size,
-                        textMeasurer = textMeasurer
+                        textMeasurer = textMeasurer,
+                        attributeBackgroundColor = attributeBackgroundColor,
+                        compositeColor = compositeColor,
+                        componentColor = componentColor,
+                        textBackgroundColor = textBackgroundColor
                     )
                 }
             }
@@ -514,7 +565,7 @@ private fun DrawScope.drawAttribute(
     val textX = attrX + radius + 10
     val textY = attrY - textLayoutResult.size.height / 2
     drawRoundRect(
-        color = Color(0xDD000000),
+        color = textBackgroundColor,
         topLeft = Offset(textX - 5, textY - 2),
         size = Size(
             textLayoutResult.size.width.toFloat() + 10,
@@ -547,7 +598,7 @@ private fun DrawScope.drawAttribute(
         )
         val multY = textY + textLayoutResult.size.height + 4
         drawRoundRect(
-            color = Color(0xDD000000),
+            color = textBackgroundColor,
             topLeft = Offset(textX - 3, multY - 1),
             size = Size(
                 multiplicityText.size.width.toFloat() + 6,
@@ -567,7 +618,11 @@ private fun DrawScope.drawAttributeComponent(
     parentY: Float,
     index: Int,
     total: Int,
-    textMeasurer: TextMeasurer
+    textMeasurer: TextMeasurer,
+    attributeBackgroundColor: Color,
+    compositeColor: Color,
+    componentColor: Color,
+    textBackgroundColor: Color
 ) {
     val radius = 12f
     val horizontalSpacing = 60f
@@ -575,9 +630,6 @@ private fun DrawScope.drawAttributeComponent(
     val startY = parentY - ((total - 1) * verticalSpacing / 2f)
     val compX = parentX + horizontalSpacing
     val compY = startY + (index * verticalSpacing)
-    val compositeColor = Color(0xFFFFA726)
-    val componentColor = Color(0xFFFFCC80)
-    val attributeBackgroundColor = Color(0xFF424242)
     drawLine(
         color = compositeColor.copy(alpha = 0.4f),
         start = Offset(parentX, parentY),
@@ -607,7 +659,7 @@ private fun DrawScope.drawAttributeComponent(
     val textX = compX + radius + 8
     val textY = compY - textLayoutResult.size.height / 2
     drawRoundRect(
-        color = Color(0xDD000000),
+        color = textBackgroundColor,
         topLeft = Offset(textX - 4, textY - 2),
         size = Size(
             textLayoutResult.size.width.toFloat() + 8,
@@ -634,11 +686,12 @@ private fun DrawScope.drawConnectionsForRelationship(
     relationship: Relationship,
     entities: List<Entity>,
     color: Color,
-    textMeasurer: TextMeasurer
+    textMeasurer: TextMeasurer,
+    cardinalityColor: Color,
+    textBackgroundColor: Color
 ) {
     val centerX = relationship.x + relationship.width / 2
     val centerY = relationship.y + relationship.height / 2
-    val cardinalityColor = Color(0xFFFFEB3B)
     relationship.connections.forEach { connection ->
         val entity = entities.find { it.id == connection.entityId }
         if (entity != null) {
@@ -666,7 +719,7 @@ private fun DrawScope.drawConnectionsForRelationship(
             val labelX = labelCenterX - textWidth / 2
             val labelY = labelCenterY - textHeight / 2
             drawRoundRect(
-                color = Color(0xDD000000),
+                color = textBackgroundColor,
                 topLeft = Offset(labelX - 6, labelY - 3),
                 size = Size(
                     textWidth + 12,

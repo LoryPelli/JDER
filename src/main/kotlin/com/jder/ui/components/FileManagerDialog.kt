@@ -68,6 +68,7 @@ fun FileManagerDialog(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var showInvalidPathDialog by remember { mutableStateOf(false) }
     var invalidPathError by remember { mutableStateOf("") }
+    var refreshTrigger by remember { mutableStateOf(0) }
     var pathInput by remember {
         mutableStateOf(TextFieldValue(
             text = currentDirectory.absolutePath,
@@ -169,35 +170,17 @@ fun FileManagerDialog(
                     )
                     IconButton(
                         onClick = {
-                            val newPath = File(pathInput.text)
-                            when {
-                                !newPath.exists() -> {
-                                    invalidPathError = "Il percorso specificato non esiste."
-                                    showInvalidPathDialog = true
-                                }
-                                !newPath.isDirectory -> {
-                                    invalidPathError = "Il percorso specificato non è una cartella."
-                                    showInvalidPathDialog = true
-                                }
-                                !newPath.canRead() -> {
-                                    invalidPathError = "Non hai i permessi per accedere a questa cartella."
-                                    showInvalidPathDialog = true
-                                }
-                                else -> {
-                                    currentDirectory = newPath
-                                    selectedFile = null
-                                    fileName = ""
-                                }
-                            }
+                            refreshTrigger++
+                            selectedFile = null
                         }
                     ) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Vai al percorso")
+                        Icon(Icons.Default.Refresh, contentDescription = "Ricarica")
                     }
                 }
                 Box(
                     modifier = Modifier.weight(1f).fillMaxWidth()
                 ) {
-                    val files = remember(currentDirectory) {
+                    val files = remember(currentDirectory, refreshTrigger) {
                         try {
                             currentDirectory.listFiles()?.sortedWith(
                                 compareBy<File> { !it.isDirectory }
