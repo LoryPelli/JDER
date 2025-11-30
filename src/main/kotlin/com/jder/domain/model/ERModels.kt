@@ -33,9 +33,11 @@ data class Connection(
 enum class Cardinality(val display: String) {
     ONE("1"),
     ZERO_ONE("0,1"),
+    ONE_ONE("1:1"),
     MANY("N"),
     ZERO_MANY("0,N"),
-    ONE_MANY("1,N");
+    ONE_MANY("1,N"),
+    MANY_MANY("N:N");
 }
 @Serializable
 data class Attribute(
