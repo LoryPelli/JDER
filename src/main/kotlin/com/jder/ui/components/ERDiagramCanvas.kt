@@ -26,6 +26,8 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.jder.domain.model.Attribute
 import com.jder.domain.model.AttributeType
@@ -33,6 +35,8 @@ import com.jder.domain.model.DiagramState
 import com.jder.domain.model.Entity
 import com.jder.domain.model.Relationship
 import com.jder.domain.model.ToolMode
+import kotlin.math.abs
+import kotlin.math.sqrt
 @Composable
 fun ERDiagramCanvas(
     state: DiagramState,
@@ -148,7 +152,7 @@ fun ERDiagramCanvas(
                     },
                     onDrag = { change, dragAmount ->
                         change.consume()
-                        totalDragDistance += kotlin.math.sqrt(
+                        totalDragDistance += sqrt(
                             dragAmount.x * dragAmount.x + dragAmount.y * dragAmount.y
                         )
                         if (totalDragDistance > 5f) {
@@ -299,7 +303,7 @@ private fun DrawScope.drawEntity(
         style = TextStyle(
             color = textColor,
             fontSize = 14.sp,
-            fontWeight = if (isSelected || isHovered) androidx.compose.ui.text.font.FontWeight.SemiBold else androidx.compose.ui.text.font.FontWeight.Normal
+            fontWeight = if (isSelected || isHovered) FontWeight.SemiBold else FontWeight.Normal
         )
     )
     drawText(
@@ -383,7 +387,7 @@ private fun DrawScope.drawRelationship(
         style = TextStyle(
             color = textColor,
             fontSize = 14.sp,
-            fontWeight = if (isSelected || isHovered) androidx.compose.ui.text.font.FontWeight.SemiBold else androidx.compose.ui.text.font.FontWeight.Normal
+            fontWeight = if (isSelected || isHovered) FontWeight.SemiBold else FontWeight.Normal
         )
     )
     drawText(
@@ -446,7 +450,7 @@ private fun DrawScope.drawAttribute(
     val attrY = if (attribute.y != 0f) centerY + attribute.y else defaultAttrY
     val dx = attrX - centerX
     val dy = attrY - centerY
-    val distance = kotlin.math.sqrt(dx * dx + dy * dy)
+    val distance = sqrt(dx * dx + dy * dy)
     val dirX = if (distance > 0) dx / distance else 1f
     val dirY = if (distance > 0) dy / distance else 0f
     val arrowStartX = attrX - dirX * arrowLength
@@ -562,9 +566,9 @@ private fun DrawScope.drawAttribute(
             color = attributeTextColor,
             fontSize = 13.sp,
             fontWeight = if (attribute.isPrimaryKey)
-                androidx.compose.ui.text.font.FontWeight.Bold
+                FontWeight.Bold
             else
-                androidx.compose.ui.text.font.FontWeight.SemiBold
+                FontWeight.SemiBold
         )
     )
     val textX = attrX + radius + 10
@@ -576,7 +580,7 @@ private fun DrawScope.drawAttribute(
             textLayoutResult.size.width.toFloat() + 10,
             textLayoutResult.size.height.toFloat() + 4
         ),
-        cornerRadius = androidx.compose.ui.geometry.CornerRadius(4f, 4f)
+        cornerRadius = CornerRadius(4f, 4f)
     )
     drawRoundRect(
         color = attributeTextColor.copy(alpha = 0.5f),
@@ -585,7 +589,7 @@ private fun DrawScope.drawAttribute(
             textLayoutResult.size.width.toFloat() + 10,
             textLayoutResult.size.height.toFloat() + 4
         ),
-        cornerRadius = androidx.compose.ui.geometry.CornerRadius(4f, 4f),
+        cornerRadius = CornerRadius(4f, 4f),
         style = Stroke(width = 1.5f)
     )
     drawText(
@@ -598,7 +602,7 @@ private fun DrawScope.drawAttribute(
             style = TextStyle(
                 color = normalAttributeColor.copy(alpha = 0.9f),
                 fontSize = 11.sp,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Normal
+                fontWeight = FontWeight.Normal
             )
         )
         val multY = textY + textLayoutResult.size.height + 4
@@ -609,7 +613,7 @@ private fun DrawScope.drawAttribute(
                 multiplicityText.size.width.toFloat() + 6,
                 multiplicityText.size.height.toFloat() + 2
             ),
-            cornerRadius = androidx.compose.ui.geometry.CornerRadius(3f, 3f)
+            cornerRadius = CornerRadius(3f, 3f)
         )
         drawText(
             textLayoutResult = multiplicityText,
@@ -658,7 +662,7 @@ private fun DrawScope.drawAttributeComponent(
         style = TextStyle(
             color = componentColor,
             fontSize = 11.sp,
-            fontWeight = androidx.compose.ui.text.font.FontWeight.Normal
+            fontWeight = FontWeight.Normal
         )
     )
     val textX = compX + radius + 8
@@ -670,7 +674,7 @@ private fun DrawScope.drawAttributeComponent(
             textLayoutResult.size.width.toFloat() + 8,
             textLayoutResult.size.height.toFloat() + 4
         ),
-        cornerRadius = androidx.compose.ui.geometry.CornerRadius(3f, 3f)
+        cornerRadius = CornerRadius(3f, 3f)
     )
     drawRoundRect(
         color = componentColor.copy(alpha = 0.4f),
@@ -679,7 +683,7 @@ private fun DrawScope.drawAttributeComponent(
             textLayoutResult.size.width.toFloat() + 8,
             textLayoutResult.size.height.toFloat() + 4
         ),
-        cornerRadius = androidx.compose.ui.geometry.CornerRadius(3f, 3f),
+        cornerRadius = CornerRadius(3f, 3f),
         style = Stroke(width = 1.2f)
     )
     drawText(
@@ -713,7 +717,7 @@ private fun DrawScope.drawConnectionsForRelationship(
                 style = TextStyle(
                     color = cardinalityColor,
                     fontSize = 14.sp,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    fontWeight = FontWeight.Bold
                 )
             )
             val offsetFactor = 0.5f
@@ -730,7 +734,7 @@ private fun DrawScope.drawConnectionsForRelationship(
                     textWidth + 12,
                     textHeight + 6
                 ),
-                cornerRadius = androidx.compose.ui.geometry.CornerRadius(4f, 4f)
+                cornerRadius = CornerRadius(4f, 4f)
             )
             drawRoundRect(
                 color = cardinalityColor.copy(alpha = 0.6f),
@@ -739,7 +743,7 @@ private fun DrawScope.drawConnectionsForRelationship(
                     textWidth + 12,
                     textHeight + 6
                 ),
-                cornerRadius = androidx.compose.ui.geometry.CornerRadius(4f, 4f),
+                cornerRadius = CornerRadius(4f, 4f),
                 style = Stroke(width = 2f)
             )
             drawText(
@@ -795,7 +799,7 @@ private fun handleDragStart(state: DiagramState, offset: Offset): Triple<String?
                 entity.attributes.size,
                 attribute
             )
-            val distance = kotlin.math.sqrt(
+            val distance = sqrt(
                 (adjustedOffset.x - attrPos.x).let { it * it } +
                 (adjustedOffset.y - attrPos.y).let { it * it }
             )
@@ -816,7 +820,7 @@ private fun handleDragStart(state: DiagramState, offset: Offset): Triple<String?
                 rel.attributes.size,
                 attribute
             )
-            val distance = kotlin.math.sqrt(
+            val distance = sqrt(
                 (adjustedOffset.x - attrPos.x).let { it * it } +
                 (adjustedOffset.y - attrPos.y).let { it * it }
             )
@@ -874,13 +878,13 @@ private fun handleDrag(
                         }
                         val currentDx = currentAttrX - centerX
                         val currentDy = currentAttrY - centerY
-                        val currentDistanceFromCenter = kotlin.math.sqrt(currentDx * currentDx + currentDy * currentDy)
+                        val currentDistanceFromCenter = sqrt(currentDx * currentDx + currentDy * currentDy)
                         val fixedDistance = if (currentDistanceFromCenter > 0) currentDistanceFromCenter else (entity.width / 2 + 60f)
                         val newAttrX = currentAttrX + dragAmount.x / state.zoom
                         val newAttrY = currentAttrY + dragAmount.y / state.zoom
                         val dx = newAttrX - centerX
                         val dy = newAttrY - centerY
-                        val currentDistance = kotlin.math.sqrt(dx * dx + dy * dy)
+                        val currentDistance = sqrt(dx * dx + dy * dy)
                         val normalizedX = if (currentDistance > 0) dx / currentDistance else 1f
                         val normalizedY = if (currentDistance > 0) dy / currentDistance else 0f
                         attr.copy(
@@ -917,13 +921,13 @@ private fun handleDrag(
                         }
                         val currentDx = currentAttrX - centerX
                         val currentDy = currentAttrY - centerY
-                        val currentDistanceFromCenter = kotlin.math.sqrt(currentDx * currentDx + currentDy * currentDy)
+                        val currentDistanceFromCenter = sqrt(currentDx * currentDx + currentDy * currentDy)
                         val fixedDistance = if (currentDistanceFromCenter > 0) currentDistanceFromCenter else (rel.width / 2 + 60f)
                         val newAttrX = currentAttrX + dragAmount.x / state.zoom
                         val newAttrY = currentAttrY + dragAmount.y / state.zoom
                         val dx = newAttrX - centerX
                         val dy = newAttrY - centerY
-                        val currentDistance = kotlin.math.sqrt(dx * dx + dy * dy)
+                        val currentDistance = sqrt(dx * dx + dy * dy)
                         val normalizedX = if (currentDistance > 0) dx / currentDistance else 1f
                         val normalizedY = if (currentDistance > 0) dy / currentDistance else 0f
                         attr.copy(
@@ -958,8 +962,8 @@ private fun handleDrag(
 private fun isPointInDiamond(point: Offset, relationship: Relationship): Boolean {
     val centerX = relationship.x + relationship.width / 2
     val centerY = relationship.y + relationship.height / 2
-    val dx = kotlin.math.abs(point.x - centerX) / (relationship.width / 2)
-    val dy = kotlin.math.abs(point.y - centerY) / (relationship.height / 2)
+    val dx = abs(point.x - centerX) / (relationship.width / 2)
+    val dy = abs(point.y - centerY) / (relationship.height / 2)
     return (dx + dy) <= 1.0
 }
 private fun calculateAttributePosition(
@@ -995,9 +999,9 @@ private fun getClosestPointOnRectangle(
     val centerY = rectY + rectHeight / 2
     val dx = targetX - centerX
     val dy = targetY - centerY
-    val scaleX = if (dx != 0f) (rectWidth / 2) / kotlin.math.abs(dx) else Float.MAX_VALUE
-    val scaleY = if (dy != 0f) (rectHeight / 2) / kotlin.math.abs(dy) else Float.MAX_VALUE
-    val scale = kotlin.math.min(scaleX, scaleY)
+    val scaleX = if (dx != 0f) (rectWidth / 2) / abs(dx) else Float.MAX_VALUE
+    val scaleY = if (dy != 0f) (rectHeight / 2) / abs(dy) else Float.MAX_VALUE
+    val scale = minOf(scaleX, scaleY)
     return Offset(
         centerX + dx * scale,
         centerY + dy * scale
@@ -1015,7 +1019,7 @@ private fun getClosestPointOnDiamond(
     val dy = targetY - centerY
     val halfWidth = width / 2
     val halfHeight = height / 2
-    val totalScale = 1f / (kotlin.math.abs(dx) / halfWidth + kotlin.math.abs(dy) / halfHeight)
+    val totalScale = 1f / (abs(dx) / halfWidth + abs(dy) / halfHeight)
     return Offset(
         centerX + dx * totalScale,
         centerY + dy * totalScale

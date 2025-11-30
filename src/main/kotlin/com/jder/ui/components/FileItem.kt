@@ -111,9 +111,18 @@ fun FileItem(
     }
 }
 fun formatFileSize(bytes: Long): String {
-    return when {
-        bytes < 1024 -> "$bytes B"
-        bytes < 1024 * 1024 -> "${bytes / 1024} KB"
-        else -> "${bytes / (1024 * 1024)} MB"
+    if (bytes < 0) return "0 B"
+    if (bytes < 1024) return "$bytes B"
+    val units = arrayOf("KB", "MB", "GB", "TB", "PB", "EB")
+    var size = bytes.toDouble()
+    var unitIndex = -1
+    while (size >= 1024 && unitIndex < units.size - 1) {
+        size /= 1024
+        unitIndex++
+    }
+    return if (unitIndex < 0) {
+        "$bytes B"
+    } else {
+        "%.2f %s".format(size, units[unitIndex])
     }
 }

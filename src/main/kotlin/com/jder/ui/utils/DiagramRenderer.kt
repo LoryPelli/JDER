@@ -8,6 +8,9 @@ import java.awt.Color
 import java.awt.Font
 import java.awt.RenderingHints
 import java.awt.image.BufferedImage
+import kotlin.math.abs
+import kotlin.math.min
+import kotlin.math.sqrt
 fun renderDiagramToBitmap(diagram: ERDiagram): ImageBitmap {
     val padding = 200f
     val entities = diagram.entities
@@ -146,7 +149,7 @@ fun renderDiagramToBitmap(diagram: ERDiagram): ImageBitmap {
             val entityCenterY = (centerY + offsetY).toInt()
             val dx = attrX - entityCenterX
             val dy = attrY - entityCenterY
-            val distance = kotlin.math.sqrt((dx * dx + dy * dy).toDouble())
+            val distance = sqrt((dx * dx + dy * dy).toDouble())
             val dirX = if (distance > 0) dx / distance else 1.0
             val dirY = if (distance > 0) dy / distance else 0.0
             val arrowStartX = (attrX - dirX * arrowLength).toInt()
@@ -155,9 +158,9 @@ fun renderDiagramToBitmap(diagram: ERDiagram): ImageBitmap {
             val halfHeight = entity.height / 2
             val dxToStart = arrowStartX - entityCenterX
             val dyToStart = arrowStartY - entityCenterY
-            val scaleX = if (dxToStart != 0) halfWidth / kotlin.math.abs(dxToStart) else Float.MAX_VALUE
-            val scaleY = if (dyToStart != 0) halfHeight / kotlin.math.abs(dyToStart) else Float.MAX_VALUE
-            val scale = kotlin.math.min(scaleX, scaleY)
+            val scaleX = if (dxToStart != 0) halfWidth / abs(dxToStart) else Float.MAX_VALUE
+            val scaleY = if (dyToStart != 0) halfHeight / abs(dyToStart) else Float.MAX_VALUE
+            val scale = min(scaleX, scaleY)
             val connectionX = (entityCenterX + dxToStart * scale).toInt()
             val connectionY = (entityCenterY + dyToStart * scale).toInt()
             g2d.color = Color(0xBDBDBD)
@@ -249,7 +252,7 @@ fun renderDiagramToBitmap(diagram: ERDiagram): ImageBitmap {
             val radius = 20
             val dx = attrX - centerX
             val dy = attrY - centerY
-            val distance = kotlin.math.sqrt((dx * dx + dy * dy).toDouble())
+            val distance = sqrt((dx * dx + dy * dy).toDouble())
             val dirX = if (distance > 0) dx / distance else 1.0
             val dirY = if (distance > 0) dy / distance else 0.0
             val arrowStartX = (attrX - dirX * arrowLength).toInt()
@@ -258,7 +261,7 @@ fun renderDiagramToBitmap(diagram: ERDiagram): ImageBitmap {
             val dyToStart = arrowStartY - centerY
             val halfWidth2 = relationship.width / 2f
             val halfHeight2 = relationship.height / 2f
-            val totalScale = 1f / (kotlin.math.abs(dxToStart.toFloat()) / halfWidth2 + kotlin.math.abs(dyToStart.toFloat()) / halfHeight2)
+            val totalScale = 1f / (abs(dxToStart.toFloat()) / halfWidth2 + abs(dyToStart.toFloat()) / halfHeight2)
             val connectionX = (centerX + dxToStart * totalScale).toInt()
             val connectionY = (centerY + dyToStart * totalScale).toInt()
             g2d.color = Color(0xBDBDBD)
