@@ -65,6 +65,7 @@ fun MainScreen(
     var showEditConnectionDialog by remember { mutableStateOf(false) }
     var connectionToEdit by remember { mutableStateOf<Pair<String, Connection>?>(null) }
     var showNewDiagramConfirmDialog by remember { mutableStateOf(false) }
+    var showOpenDiagramConfirmDialog by remember { mutableStateOf(false) }
     var showContextMenu by remember { mutableStateOf(false) }
     var contextMenuPosition by remember { mutableStateOf(Offset.Zero) }
     var contextMenuForEntity by remember { mutableStateOf(false) }
@@ -118,7 +119,11 @@ fun MainScreen(
                         true
                     }
                     keyEvent.isCtrlPressed && keyEvent.key == Key.O -> {
-                        showOpenDialog = true
+                        if (state.isModified) {
+                            showOpenDiagramConfirmDialog = true
+                        } else {
+                            showOpenDialog = true
+                        }
                         true
                     }
                     keyEvent.isCtrlPressed && keyEvent.key == Key.S -> {
@@ -185,7 +190,11 @@ fun MainScreen(
                     }
                 },
                 onOpenDiagram = {
-                    showOpenDialog = true
+                    if (state.isModified) {
+                        showOpenDiagramConfirmDialog = true
+                    } else {
+                        showOpenDialog = true
+                    }
                 },
                 onSaveDiagram = {
                     if (state.currentFile != null) {
@@ -463,6 +472,28 @@ fun MainScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showNewDiagramConfirmDialog = false }) {
+                    Text("No")
+                }
+            }
+        )
+    }
+    if (showOpenDiagramConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showOpenDiagramConfirmDialog = false },
+            title = { Text("Conferma apertura diagramma") },
+            text = { Text("Ci sono modifiche non salvate. Vuoi aprire un altro diagramma comunque?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showOpenDiagramConfirmDialog = false
+                        showOpenDialog = true
+                    }
+                ) {
+                    Text("Sì")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showOpenDiagramConfirmDialog = false }) {
                     Text("No")
                 }
             }
