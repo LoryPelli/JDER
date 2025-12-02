@@ -33,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.jder.domain.model.Attribute
@@ -95,7 +96,7 @@ private fun AttributeDialog(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text("Chiave Primaria")
                     Switch(
@@ -202,7 +203,7 @@ private fun AttributeDialog(
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
                                 "Componenti (${components.size})",
@@ -229,7 +230,7 @@ private fun AttributeDialog(
                                                 .fillMaxWidth()
                                                 .padding(8.dp),
                                             horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                                            verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Text(
                                                 component.name,

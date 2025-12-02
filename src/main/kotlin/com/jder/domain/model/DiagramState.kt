@@ -1,7 +1,8 @@
 package com.jder.domain.model
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
 import java.util.UUID
 class DiagramState {
     var diagram by mutableStateOf(ERDiagram(name = "Nuovo Diagramma"))
@@ -15,7 +16,7 @@ class DiagramState {
         private set
     var currentFile by mutableStateOf<String?>(null)
     var zoom by mutableStateOf(1.0f)
-    var panOffset by mutableStateOf(androidx.compose.ui.geometry.Offset.Zero)
+    var panOffset by mutableStateOf(Offset.Zero)
     private val undoStack = mutableListOf<ERDiagram>()
     private val redoStack = mutableListOf<ERDiagram>()
     private val maxUndoSize = 50
@@ -260,7 +261,7 @@ class DiagramState {
     }
     fun resetView() {
         zoom = 1.0f
-        panOffset = androidx.compose.ui.geometry.Offset.Zero
+        panOffset = Offset.Zero
     }
 }
 enum class ToolMode {

@@ -36,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import com.jder.domain.model.Attribute
 import com.jder.domain.model.Connection
 import com.jder.domain.model.DiagramState
+import com.jder.domain.model.Entity
+import com.jder.domain.model.Relationship
 @Composable
 fun PropertiesPanel(
     state: DiagramState,
@@ -112,7 +114,7 @@ fun PropertiesPanel(
 }
 @Composable
 private fun EntityPropertiesContent(
-    entity: com.jder.domain.model.Entity,
+    entity: Entity,
     onEditEntity: () -> Unit,
     onAddAttribute: () -> Unit,
     onEditAttribute: (Attribute) -> Unit,
@@ -176,8 +178,8 @@ private fun EntityPropertiesContent(
 }
 @Composable
 private fun RelationshipPropertiesContent(
-    relationship: com.jder.domain.model.Relationship,
-    entities: List<com.jder.domain.model.Entity>,
+    relationship: Relationship,
+    entities: List<Entity>,
     onEditRelationship: () -> Unit,
     onAddAttribute: () -> Unit,
     onAddConnection: () -> Unit,
