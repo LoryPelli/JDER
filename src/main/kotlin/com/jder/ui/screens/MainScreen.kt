@@ -132,7 +132,7 @@ fun MainScreen(
                             repository.saveDiagram(state.diagram, file).fold(
                                 onSuccess = {
                                     state.markAsSaved(file.absolutePath)
-                                    snackbarMessage = "Salvato"
+                                    snackbarMessage = "Diagramma salvato"
                                 },
                                 onFailure = { snackbarMessage = "Errore salvataggio" }
                             )
