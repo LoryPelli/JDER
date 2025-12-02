@@ -571,7 +571,12 @@ private fun DrawScope.drawAttribute(
                 FontWeight.SemiBold
         )
     )
-    val textX = attrX + radius + 10
+    val isComposite = attribute.type == AttributeType.COMPOSITE && attribute.components.isNotEmpty()
+    val textX = if (isComposite) {
+        attrX - radius - textLayoutResult.size.width.toFloat() - 10
+    } else {
+        attrX + radius + 10
+    }
     val textY = attrY - textLayoutResult.size.height / 2
     drawRoundRect(
         color = textBackgroundColor,

@@ -188,7 +188,15 @@ fun renderDiagramToBitmap(diagram: ERDiagram): ImageBitmap {
             }
             g2d.font = Font("Arial", Font.BOLD, 12)
             g2d.color = Color.BLACK
-            g2d.drawString(attribute.name, attrX + radius + 10, attrY + 5)
+            val isComposite = attribute.type == AttributeType.COMPOSITE && attribute.components.isNotEmpty()
+            val textX = if (isComposite) {
+                val attrFm = g2d.fontMetrics
+                val attrTextWidth = attrFm.stringWidth(attribute.name)
+                attrX - radius - attrTextWidth - 10
+            } else {
+                attrX + radius + 10
+            }
+            g2d.drawString(attribute.name, textX, attrY + 5)
             if (attribute.type == AttributeType.COMPOSITE && attribute.components.isNotEmpty()) {
                 val compRadius = 12
                 val horizontalSpacing = 60
@@ -289,7 +297,15 @@ fun renderDiagramToBitmap(diagram: ERDiagram): ImageBitmap {
             }
             g2d.font = Font("Arial", Font.BOLD, 12)
             g2d.color = Color.BLACK
-            g2d.drawString(attribute.name, attrX + radius + 10, attrY + 5)
+            val isComposite = attribute.type == AttributeType.COMPOSITE && attribute.components.isNotEmpty()
+            val textX = if (isComposite) {
+                val attrFm = g2d.fontMetrics
+                val attrTextWidth = attrFm.stringWidth(attribute.name)
+                attrX - radius - attrTextWidth - 10
+            } else {
+                attrX + radius + 10
+            }
+            g2d.drawString(attribute.name, textX, attrY + 5)
             if (attribute.type == AttributeType.COMPOSITE && attribute.components.isNotEmpty()) {
                 val compRadius = 12
                 val horizontalSpacing = 60
