@@ -236,6 +236,9 @@ fun MainScreen(
                         snackbarMessage = "Azione ripristinata"
                     }
                 },
+                onShowSnackbar = { message ->
+                    snackbarMessage = message
+                },
                 modifier = Modifier
             )
         }

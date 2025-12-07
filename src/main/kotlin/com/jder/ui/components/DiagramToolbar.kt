@@ -61,6 +61,7 @@ fun DiagramToolbar(
     onResetZoom: () -> Unit,
     onUndo: () -> Unit,
     onRedo: () -> Unit,
+    onShowSnackbar: (String) -> Unit,
     modifier: Modifier
 ) {
     val title by remember {
@@ -137,10 +138,14 @@ fun DiagramToolbar(
                                     delay(150)
                                     showFileMenu = false
                                     when {
-                                        state.selectedEntityId != null ->
+                                        state.selectedEntityId != null -> {
                                             state.deleteEntity(state.selectedEntityId!!)
-                                        state.selectedRelationshipId != null ->
+                                            onShowSnackbar("Entità eliminata")
+                                        }
+                                        state.selectedRelationshipId != null -> {
                                             state.deleteRelationship(state.selectedRelationshipId!!)
+                                            onShowSnackbar("Relazione eliminata")
+                                        }
                                     }
                                 }
                             },
@@ -272,10 +277,14 @@ fun DiagramToolbar(
                 IconButton(
                     onClick = {
                         when {
-                            state.selectedEntityId != null ->
+                            state.selectedEntityId != null -> {
                                 state.deleteEntity(state.selectedEntityId!!)
-                            state.selectedRelationshipId != null ->
+                                onShowSnackbar("Entità eliminata")
+                            }
+                            state.selectedRelationshipId != null -> {
                                 state.deleteRelationship(state.selectedRelationshipId!!)
+                                onShowSnackbar("Relazione eliminata")
+                            }
                         }
                     },
                     enabled = state.selectedEntityId != null || state.selectedRelationshipId != null,
