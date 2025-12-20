@@ -287,11 +287,8 @@ class DiagramState {
             name = relationship.name,
             x = centerX - 70f,
             y = centerY - 35f,
-            width = 140f,
-            height = 70f,
             attributes = relationship.attributes,
-            documentation = relationship.documentation,
-            isWeak = false
+            documentation = relationship.documentation
         )
         val entity1CenterX = entity1?.let { it.x + it.width / 2 } ?: (centerX - 200f)
         val entity1CenterY = entity1?.let { it.y + it.height / 2 } ?: centerY
@@ -307,28 +304,20 @@ class DiagramState {
                 name = "Nuova Relazione",
                 x = rel1X,
                 y = rel1Y,
-                width = 120f,
-                height = 120f,
-                attributes = emptyList(),
                 connections = listOf(
-                    Connection(entityId = newEntity.id, cardinality = Cardinality.ONE_ONE),
-                    Connection(entityId = conn1.entityId, cardinality = conn1.cardinality)
-                ),
-                documentation = ""
+                    Connection(entityId = newEntity.id, cardinality = conn1.cardinality),
+                    Connection(entityId = conn1.entityId, cardinality = Cardinality.ONE_ONE)
+                )
             ),
             Relationship(
                 id = UUID.randomUUID().toString(),
                 name = "Nuova Relazione",
                 x = rel2X,
                 y = rel2Y,
-                width = 120f,
-                height = 120f,
-                attributes = emptyList(),
                 connections = listOf(
-                    Connection(entityId = newEntity.id, cardinality = Cardinality.ONE_ONE),
-                    Connection(entityId = conn2.entityId, cardinality = conn2.cardinality)
-                ),
-                documentation = ""
+                    Connection(entityId = newEntity.id, cardinality = conn2.cardinality),
+                    Connection(entityId = conn2.entityId, cardinality = Cardinality.ONE_ONE)
+                )
             )
         )
         diagram = diagram.copy(
