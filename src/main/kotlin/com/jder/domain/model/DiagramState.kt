@@ -259,6 +259,9 @@ class DiagramState {
         currentFile = filePath
         isModified = false
     }
+    fun updateDiagramName(newName: String) {
+        diagram = diagram.copy(name = newName)
+    }
     fun resetView() {
         zoom = 1.0f
         panOffset = Offset.Zero

@@ -70,7 +70,6 @@ fun MainScreen(
     var contextMenuPosition by remember { mutableStateOf(Offset.Zero) }
     var contextMenuForEntity by remember { mutableStateOf(false) }
     var showOpenDialog by remember { mutableStateOf(false) }
-    var showSaveDialog by remember { mutableStateOf(false) }
     var showSaveAsDialog by remember { mutableStateOf(false) }
     var showExportDialog by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf<String?>(null) }
@@ -129,8 +128,10 @@ fun MainScreen(
                     keyEvent.isCtrlPressed && keyEvent.key == Key.S -> {
                         if (state.currentFile != null) {
                             val file = File(state.currentFile!!)
-                            repository.saveDiagram(state.diagram, file).fold(
+                            val updatedDiagram = state.diagram.copy(name = file.nameWithoutExtension)
+                            repository.saveDiagram(updatedDiagram, file).fold(
                                 onSuccess = {
+                                    state.updateDiagramName(file.nameWithoutExtension)
                                     state.markAsSaved(file.absolutePath)
                                     snackbarMessage = "Diagramma salvato"
                                 },
@@ -199,8 +200,10 @@ fun MainScreen(
                 onSaveDiagram = {
                     if (state.currentFile != null) {
                         val file = File(state.currentFile!!)
-                        repository.saveDiagram(state.diagram, file).fold(
+                        val updatedDiagram = state.diagram.copy(name = file.nameWithoutExtension)
+                        repository.saveDiagram(updatedDiagram, file).fold(
                             onSuccess = {
+                                state.updateDiagramName(file.nameWithoutExtension)
                                 state.markAsSaved(file.absolutePath)
                                 snackbarMessage = "Diagramma salvato"
                             },
@@ -211,6 +214,9 @@ fun MainScreen(
                     } else {
                         showSaveAsDialog = true
                     }
+                },
+                onSaveAsDiagram = {
+                    showSaveAsDialog = true
                 },
                 onExportPNG = {
                     showExportDialog = true
@@ -527,24 +533,25 @@ fun MainScreen(
             }
         )
     }
-    if (showSaveAsDialog || showSaveDialog) {
+    if (showSaveAsDialog) {
         FileManagerDialog(
             mode = FileManagerMode.SAVE,
             initialDirectory = File(System.getProperty("user.home")),
             fileExtension = ".json",
             title = "Salva Diagramma",
+            defaultFileName = state.diagram.name,
             onDismiss = {
                 showSaveAsDialog = false
-                showSaveDialog = false
             },
             onFileSelected = { file ->
                 showSaveAsDialog = false
-                showSaveDialog = false
                 val finalFile = if (file.extension != "json") {
                     File(file.parentFile, "${file.nameWithoutExtension}.json")
                 } else file
-                repository.saveDiagram(state.diagram, finalFile).fold(
+                val updatedDiagram = state.diagram.copy(name = finalFile.nameWithoutExtension)
+                repository.saveDiagram(updatedDiagram, finalFile).fold(
                     onSuccess = {
+                        state.updateDiagramName(finalFile.nameWithoutExtension)
                         state.markAsSaved(finalFile.absolutePath)
                         snackbarMessage = "Diagramma salvato: ${finalFile.name}"
                     },

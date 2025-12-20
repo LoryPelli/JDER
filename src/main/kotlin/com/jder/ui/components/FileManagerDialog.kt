@@ -60,11 +60,12 @@ fun FileManagerDialog(
     initialDirectory: File,
     fileExtension: String,
     title: String,
+    defaultFileName: String? = null,
     onDismiss: () -> Unit,
     onFileSelected: (File) -> Unit
 ) {
     var currentDirectory by remember { mutableStateOf(initialDirectory) }
-    var fileName by remember { mutableStateOf("") }
+    var fileName by remember { mutableStateOf(defaultFileName ?: "") }
     var selectedFile by remember { mutableStateOf<File?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var showInvalidPathDialog by remember { mutableStateOf(false) }

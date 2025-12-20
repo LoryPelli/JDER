@@ -55,6 +55,7 @@ fun DiagramToolbar(
     onNewDiagram: () -> Unit,
     onOpenDiagram: () -> Unit,
     onSaveDiagram: () -> Unit,
+    onSaveAsDiagram: () -> Unit,
     onExportPNG: () -> Unit,
     onZoomIn: () -> Unit,
     onZoomOut: () -> Unit,
@@ -126,6 +127,17 @@ fun DiagramToolbar(
                                     delay(150)
                                     showFileMenu = false
                                     onSaveDiagram()
+                                }
+                            },
+                            leadingIcon = { Icon(Icons.Default.Save, null) }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Salva con nome...") },
+                            onClick = {
+                                coroutineScope.launch {
+                                    delay(150)
+                                    showFileMenu = false
+                                    onSaveAsDiagram()
                                 }
                             },
                             leadingIcon = { Icon(Icons.Default.Save, null) }
