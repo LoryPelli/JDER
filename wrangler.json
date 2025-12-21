@@ -1,0 +1,12 @@
+{
+  "name": "jder",
+  "compatibility_date": "2025-12-20",
+  "route": {
+    "pattern": "jder.lorypelli.dev",
+    "custom_domain": true
+  },
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./src/web"
+  }
+}
