@@ -40,7 +40,7 @@ fun main() = application {
         icon = painterResource("jder_icon.png")
     ) {
         window.minimumSize = Dimension(800, 600)
-        JDERTheme(darkTheme = themeState.isDarkTheme) {
+        JDERTheme(darkTheme = themeState.isDarkTheme, colorPalette = themeState.selectedPalette) {
             MainScreen(
                 state = diagramState,
                 themeState = themeState,

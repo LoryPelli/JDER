@@ -234,6 +234,11 @@ fun DiagramToolbar(
                         )
                     }
                 }
+                PaletteSelector(
+                    selectedPalette = themeState.selectedPalette,
+                    onPaletteSelected = { palette -> themeState.selectPalette(palette) },
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                )
                 ThemeToggleButton(
                     isDarkTheme = themeState.isDarkTheme,
                     onToggle = { themeState.toggleTheme() },
