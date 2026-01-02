@@ -1161,9 +1161,7 @@ private fun calculateAttributePosition(
 ): Offset {
     val centerX = entityX + entityWidth / 2
     val centerY = entityY + entityHeight / 2
-    if (attribute.x != 0f || attribute.y != 0f) {
-        return Offset(centerX + attribute.x, centerY + attribute.y)
-    }
+    if (attribute.x != 0f || attribute.y != 0f) return Offset(centerX + attribute.x, centerY + attribute.y)
     val arrowLength = 60f
     val verticalSpacing = 60f
     val startY = centerY - ((total - 1) * verticalSpacing / 2f)
