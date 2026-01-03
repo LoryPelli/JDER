@@ -21,6 +21,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -78,6 +81,10 @@ fun MainScreen(
     var showExportDialog by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf<String?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
     LaunchedEffect(snackbarMessage) {
         snackbarMessage?.let { message ->
             snackbarHostState.showSnackbar(message)
@@ -95,7 +102,10 @@ fun MainScreen(
                 )
             }
         },
-        modifier = Modifier.onPreviewKeyEvent { keyEvent ->
+        modifier = Modifier
+            .focusRequester(focusRequester)
+            .focusTarget()
+            .onPreviewKeyEvent { keyEvent ->
             if (keyEvent.type == KeyEventType.KeyDown) {
                 when {
                     keyEvent.isCtrlPressed && keyEvent.key == Key.Z -> {
@@ -137,9 +147,9 @@ fun MainScreen(
                                 onSuccess = {
                                     state.updateDiagramName(file.nameWithoutExtension)
                                     state.markAsSaved(file.absolutePath)
-                                    snackbarMessage = "Diagramma salvato"
+                                    snackbarMessage = "Diagramma salvato: ${file.name}"
                                 },
-                                onFailure = { snackbarMessage = "Errore salvataggio" }
+                                onFailure = { error -> snackbarMessage = "Errore nel salvataggio: ${error.message}" }
                             )
                         } else {
                             showSaveAsDialog = true
@@ -163,7 +173,7 @@ fun MainScreen(
                         }
                         true
                     }
-                    keyEvent.isCtrlPressed && keyEvent.key == Key.Equals -> {
+                    keyEvent.isCtrlPressed && keyEvent.key == Key.Plus -> {
                         state.zoom = (state.zoom * 1.2f).coerceAtMost(3f)
                         true
                     }
@@ -213,7 +223,7 @@ fun MainScreen(
                             onSuccess = {
                                 state.updateDiagramName(file.nameWithoutExtension)
                                 state.markAsSaved(file.absolutePath)
-                                snackbarMessage = "Diagramma salvato"
+                                snackbarMessage = "Diagramma salvato: ${file.name}"
                             },
                             onFailure = { error ->
                                 snackbarMessage = "Errore nel salvataggio: ${error.message}"
