@@ -118,9 +118,9 @@ fun FileManagerDialog(
                 ) {
                     IconButton(
                         onClick = {
-                            currentDirectory.parentFile?.let { parent ->
-                                if (parent.exists() && parent.canRead()) {
-                                    currentDirectory = parent
+                            currentDirectory.parentFile?.let {
+                                if (it.exists() && it.canRead()) {
+                                    currentDirectory = it
                                     selectedFile = null
                                 }
                             }
@@ -208,8 +208,8 @@ fun FileManagerDialog(
                                     .thenBy { it.name.lowercase() }
                             ) ?: emptyList()
                             if (showOnlySupportedFiles) {
-                                allFiles.filter { file ->
-                                    file.isDirectory || file.extension == "json"
+                                allFiles.filter {
+                                    it.isDirectory || it.extension == "json"
                                 }
                             } else {
                                 allFiles
@@ -245,31 +245,31 @@ fun FileManagerDialog(
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            items(files) { file ->
+                            items(files) {
                                 FileItem(
-                                    file = file,
-                                    isSelected = selectedFile == file,
+                                    file = it,
+                                    isSelected = selectedFile == it,
                                     fileExtension = fileExtension,
                                     mode = mode,
                                     onClick = {
-                                        if (file.isDirectory) {
-                                            if (file.canRead()) {
-                                                currentDirectory = file
+                                        if (it.isDirectory) {
+                                            if (it.canRead()) {
+                                                currentDirectory = it
                                                 selectedFile = null
                                             }
                                         } else {
-                                            selectedFile = file
-                                            fileName = file.nameWithoutExtension
+                                            selectedFile = it
+                                            fileName = it.nameWithoutExtension
                                         }
                                     },
                                     onDoubleClick = {
-                                        if (file.isDirectory) {
-                                            if (file.canRead()) {
-                                                currentDirectory = file
+                                        if (it.isDirectory) {
+                                            if (it.canRead()) {
+                                                currentDirectory = it
                                                 selectedFile = null
                                             }
-                                        } else if (mode == FileManagerMode.OPEN && file.extension == fileExtension.removePrefix(".")) {
-                                            onFileSelected(file)
+                                        } else if (mode == FileManagerMode.OPEN && it.extension == fileExtension.removePrefix(".")) {
+                                            onFileSelected(it)
                                         }
                                     }
                                 )
@@ -333,9 +333,9 @@ fun FileManagerDialog(
                                     }
                                 }
                                 FileManagerMode.OPEN -> {
-                                    selectedFile?.let { file ->
-                                        if (file.exists() && file.isFile) {
-                                            onFileSelected(file)
+                                    selectedFile?.let {
+                                        if (it.exists() && it.isFile) {
+                                            onFileSelected(it)
                                         }
                                     }
                                 }

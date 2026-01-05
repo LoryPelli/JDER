@@ -27,8 +27,8 @@ fun NotePropertiesDialog(
             Column {
                 OutlinedTextField(
                     value = text,
-                    onValueChange = { newText ->
-                        text = newText
+                    onValueChange = {
+                        text = it
                     },
                     label = { Text("Testo") },
                     modifier = Modifier.fillMaxWidth().height(200.dp),

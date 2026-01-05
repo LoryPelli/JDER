@@ -105,24 +105,24 @@ fun MainScreen(
         modifier = Modifier
             .focusRequester(focusRequester)
             .focusTarget()
-            .onPreviewKeyEvent { keyEvent ->
-            if (keyEvent.type == KeyEventType.KeyDown) {
+            .onPreviewKeyEvent { event ->
+                if (event.type == KeyEventType.KeyDown) {
                 when {
-                    keyEvent.isCtrlPressed && keyEvent.key == Key.Z -> {
+                    event.isCtrlPressed && event.key == Key.Z -> {
                         if (state.canUndo()) {
                             state.undo()
                             snackbarMessage = "Azione annullata"
                         }
                         true
                     }
-                    keyEvent.isCtrlPressed && keyEvent.key == Key.Y -> {
+                    event.isCtrlPressed && event.key == Key.Y -> {
                         if (state.canRedo()) {
                             state.redo()
                             snackbarMessage = "Azione ripristinata"
                         }
                         true
                     }
-                    keyEvent.isCtrlPressed && keyEvent.key == Key.N -> {
+                    event.isCtrlPressed && event.key == Key.N -> {
                         if (state.isModified) {
                             showNewDiagramConfirmDialog = true
                         } else {
@@ -131,7 +131,7 @@ fun MainScreen(
                         }
                         true
                     }
-                    keyEvent.isCtrlPressed && keyEvent.key == Key.O -> {
+                    event.isCtrlPressed && event.key == Key.O -> {
                         if (state.isModified) {
                             showOpenDiagramConfirmDialog = true
                         } else {
@@ -139,9 +139,9 @@ fun MainScreen(
                         }
                         true
                     }
-                    keyEvent.isCtrlPressed && keyEvent.key == Key.S -> {
-                        state.currentFile?.let {
-                            val file = File(it)
+                    event.isCtrlPressed && event.key == Key.S -> {
+                        state.currentFile?.let { text ->
+                            val file = File(text)
                             val updatedDiagram = state.diagram.copy(name = file.nameWithoutExtension)
                             repository.saveDiagram(updatedDiagram, file).fold(
                                 onSuccess = {
@@ -156,7 +156,7 @@ fun MainScreen(
                         }
                         true
                     }
-                    keyEvent.key == Key.Delete || keyEvent.key == Key.Backspace -> {
+                    event.key == Key.Delete || event.key == Key.Backspace -> {
                         state.selectedEntityId?.let {
                             state.deleteEntity(it)
                             snackbarMessage = "Entità eliminata"
@@ -171,19 +171,19 @@ fun MainScreen(
                         }
                         true
                     }
-                    keyEvent.isCtrlPressed && keyEvent.key == Key.Plus -> {
+                    event.isCtrlPressed && event.key == Key.Plus -> {
                         state.zoom = (state.zoom * 1.2f).coerceAtMost(3f)
                         true
                     }
-                    keyEvent.isCtrlPressed && keyEvent.key == Key.Minus -> {
+                    event.isCtrlPressed && event.key == Key.Minus -> {
                         state.zoom = (state.zoom / 1.2f).coerceAtLeast(0.25f)
                         true
                     }
-                    keyEvent.isCtrlPressed && keyEvent.key == Key.Zero -> {
+                    event.isCtrlPressed && event.key == Key.Zero -> {
                         state.resetView()
                         true
                     }
-                    keyEvent.key == Key.Escape -> {
+                    event.key == Key.Escape -> {
                         state.clearSelection()
                         state.toolMode = ToolMode.SELECT
                         true
@@ -214,8 +214,8 @@ fun MainScreen(
                     }
                 },
                 onSaveDiagram = {
-                    state.currentFile?.let {
-                        val file = File(it)
+                    state.currentFile?.let { text ->
+                        val file = File(text)
                         val updatedDiagram = state.diagram.copy(name = file.nameWithoutExtension)
                         repository.saveDiagram(updatedDiagram, file).fold(
                             onSuccess = {
@@ -258,17 +258,17 @@ fun MainScreen(
                         snackbarMessage = "Azione ripristinata"
                     }
                 },
-                onShowSnackbar = { message ->
-                    snackbarMessage = message
+                onShowSnackbar = {
+                    snackbarMessage = it
                 },
                 modifier = Modifier
             )
         }
-    ) { paddingValues ->
+    ) { values ->
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(values)
         ) {
             Box(
                 modifier = Modifier
@@ -288,11 +288,11 @@ fun MainScreen(
                     val selectedRelationship = if (contextMenuType == ContextMenuType.RELATIONSHIP && state.selectedRelationshipId != null) {
                         state.diagram.relationships.find { it.id == state.selectedRelationshipId }
                     } else null
-                    val isNtoN = selectedRelationship?.let {
-                        it.connections.size == 2 && it.connections.all { conn ->
-                            conn.cardinality == Cardinality.MANY ||
-                            conn.cardinality == Cardinality.ZERO_MANY ||
-                            conn.cardinality == Cardinality.ONE_MANY
+                    val isNtoN = selectedRelationship?.let { relationship ->
+                        relationship.connections.size == 2 && relationship.connections.all {
+                            it.cardinality == Cardinality.MANY ||
+                            it.cardinality == Cardinality.ZERO_MANY ||
+                            it.cardinality == Cardinality.ONE_MANY
                         }
                     } ?: false
                     ContextMenu(
@@ -369,8 +369,8 @@ fun MainScreen(
                         onEditNote = { showNoteDialog = true },
                         onAddAttribute = { showAddAttributeDialog = true },
                         onAddConnection = { showCreateConnectionDialog = true },
-                        onEditAttribute = { attribute ->
-                            attributeToEdit = attribute
+                        onEditAttribute = {
+                            attributeToEdit = it
                             showEditAttributeDialog = true
                         },
                         onDeleteAttribute = { attributeId ->
@@ -389,6 +389,7 @@ fun MainScreen(
                         },
                         onDeleteConnection = { entityId ->
                             state.selectedRelationshipId?.let {
+                                state.deleteConnection(it, entityId)
                                 state.deleteConnection(it, entityId)
                                 snackbarMessage = "Connessione eliminata"
                             }
@@ -411,12 +412,12 @@ fun MainScreen(
     }
     if (showEntityDialog) {
         val entity = state.diagram.entities.find { it.id == state.selectedEntityId }
-        entity?.let {
+        entity?.let { e ->
             EntityPropertiesDialog(
-                entity = it,
+                entity = e,
                 onDismiss = { showEntityDialog = false },
-                onSave = { updatedEntity ->
-                    state.updateEntity(it.id) { updatedEntity }
+                onSave = {
+                    state.updateEntity(e.id) { it }
                     showEntityDialog = false
                 }
             )
@@ -424,12 +425,12 @@ fun MainScreen(
     }
     if (showRelationshipDialog) {
         val relationship = state.diagram.relationships.find { it.id == state.selectedRelationshipId }
-        relationship?.let {
+        relationship?.let { r ->
             RelationshipPropertiesDialog(
-                relationship = it,
+                relationship = r,
                 onDismiss = { showRelationshipDialog = false },
-                onSave = { updatedRelationship ->
-                    state.updateRelationship(it.id) { updatedRelationship }
+                onSave = {
+                    state.updateRelationship(r.id) { it }
                     showRelationshipDialog = false
                 }
             )

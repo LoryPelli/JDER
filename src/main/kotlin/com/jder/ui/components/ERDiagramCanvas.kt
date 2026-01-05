@@ -134,11 +134,11 @@ fun ERDiagramCanvas(
                             (offset.x - state.panOffset.x) / state.zoom,
                             (offset.y - state.panOffset.y) / state.zoom
                         )
-                        val clickedEntity = state.diagram.entities.find { entity ->
-                            adjustedOffset.x >= entity.x &&
-                            adjustedOffset.x <= entity.x + entity.width &&
-                            adjustedOffset.y >= entity.y &&
-                            adjustedOffset.y <= entity.y + entity.height
+                        val clickedEntity = state.diagram.entities.find {
+                            adjustedOffset.x >= it.x &&
+                            adjustedOffset.x <= it.x + it.width &&
+                            adjustedOffset.y >= it.y &&
+                            adjustedOffset.y <= it.y + it.height
                         }
                         val clickedRelationship = if (clickedEntity == null) {
                             state.diagram.relationships.find {
@@ -146,9 +146,9 @@ fun ERDiagramCanvas(
                             }
                         } else null
                         val clickedNote = if (clickedEntity == null && clickedRelationship == null) {
-                            state.diagram.notes.find { note ->
-                                adjustedOffset.x >= note.x && adjustedOffset.x <= note.x + note.width &&
-                                adjustedOffset.y >= note.y && adjustedOffset.y <= note.y + note.height
+                            state.diagram.notes.find {
+                                adjustedOffset.x >= it.x && adjustedOffset.x <= it.x + it.width &&
+                                adjustedOffset.y >= it.y && adjustedOffset.y <= it.y + it.height
                             }
                         } else null
                         clickedEntity?.let {
@@ -177,11 +177,11 @@ fun ERDiagramCanvas(
                                 (position.x - state.panOffset.x) / state.zoom,
                                 (position.y - state.panOffset.y) / state.zoom
                             )
-                            val clickedEntity = state.diagram.entities.find { entity ->
-                                adjustedOffset.x >= entity.x &&
-                                adjustedOffset.x <= entity.x + entity.width &&
-                                adjustedOffset.y >= entity.y &&
-                                adjustedOffset.y <= entity.y + entity.height
+                            val clickedEntity = state.diagram.entities.find {
+                                adjustedOffset.x >= it.x &&
+                                adjustedOffset.x <= it.x + it.width &&
+                                adjustedOffset.y >= it.y &&
+                                adjustedOffset.y <= it.y + it.height
                             }
                             val clickedRelationship = if (clickedEntity == null) {
                                 state.diagram.relationships.find {
@@ -189,9 +189,9 @@ fun ERDiagramCanvas(
                                 }
                             } else null
                             val clickedNote = if (clickedEntity == null && clickedRelationship == null) {
-                                state.diagram.notes.find { note ->
-                                    adjustedOffset.x >= note.x && adjustedOffset.x <= note.x + note.width &&
-                                    adjustedOffset.y >= note.y && adjustedOffset.y <= note.y + note.height
+                                state.diagram.notes.find {
+                                    adjustedOffset.x >= it.x && adjustedOffset.x <= it.x + it.width &&
+                                    adjustedOffset.y >= it.y && adjustedOffset.y <= it.y + it.height
                                 }
                             } else null
                             clickedEntity?.let {
@@ -993,9 +993,9 @@ private fun handleDragStart(state: DiagramState, offset: Offset): Triple<String?
             }
         }
     }
-    val entity = state.diagram.entities.find { entity ->
-        adjustedOffset.x >= entity.x && adjustedOffset.x <= entity.x + entity.width &&
-        adjustedOffset.y >= entity.y && adjustedOffset.y <= entity.y + entity.height
+    val entity = state.diagram.entities.find {
+        adjustedOffset.x >= it.x && adjustedOffset.x <= it.x + it.width &&
+        adjustedOffset.y >= it.y && adjustedOffset.y <= it.y + it.height
     }
     entity?.let {
         state.selectEntity(it.id)
