@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.jder.ui.theme.ColorPalette
 import com.jder.ui.theme.ColorPalettes
@@ -48,14 +49,22 @@ fun PaletteSelector(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     rowPalettes.forEach { palette ->
+                        val isSelected = palette == selectedPalette
                         Box(
                             modifier = Modifier
-                                .size(32.dp)
+                                .size(if (isSelected) 36.dp else 32.dp)
+                                .then(
+                                    if (isSelected) {
+                                        Modifier
+                                            .border(3.dp, palette.primaryColor, CircleShape)
+                                            .padding(2.dp)
+                                    } else Modifier
+                                )
                                 .clip(CircleShape)
                                 .background(palette.primaryColor)
                                 .border(
-                                    width = if (palette == selectedPalette) 3.dp else 1.dp,
-                                    color = if (palette == selectedPalette) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                                    width = if (isSelected) 2.dp else 1.dp,
+                                    color = if (isSelected) Color.White else MaterialTheme.colorScheme.outline,
                                     shape = CircleShape
                                 )
                                 .clickable {
