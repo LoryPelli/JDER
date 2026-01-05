@@ -85,44 +85,42 @@ fun PropertiesPanel(
             }
         }
         Divider()
-        when {
-            state.selectedEntityId != null -> {
-                val entity = state.diagram.entities.find { it.id == state.selectedEntityId }
-                entity?.let {
-                    EntityPropertiesContent(
-                        entity = it,
-                        onEditEntity = onEditEntity,
-                        onAddAttribute = onAddAttribute,
-                        onEditAttribute = onEditAttribute,
-                        onDeleteAttribute = onDeleteAttribute
-                    )
-                }
+        state.selectedEntityId?.let { selId ->
+            val entity = state.diagram.entities.find { it.id == selId }
+            entity?.let {
+                EntityPropertiesContent(
+                    entity = it,
+                    onEditEntity = onEditEntity,
+                    onAddAttribute = onAddAttribute,
+                    onEditAttribute = onEditAttribute,
+                    onDeleteAttribute = onDeleteAttribute
+                )
             }
-            state.selectedRelationshipId != null -> {
-                val relationship = state.diagram.relationships.find { it.id == state.selectedRelationshipId }
-                relationship?.let {
-                    RelationshipPropertiesContent(
-                        relationship = it,
-                        entities = state.diagram.entities,
-                        onEditRelationship = onEditRelationship,
-                        onAddAttribute = onAddAttribute,
-                        onAddConnection = onAddConnection,
-                        onEditAttribute = onEditAttribute,
-                        onDeleteAttribute = onDeleteAttribute,
-                        onEditConnection = onEditConnection,
-                        onDeleteConnection = onDeleteConnection,
-                        onConvertToAssociativeEntity = onConvertToAssociativeEntity
-                    )
-                }
+        }
+        state.selectedRelationshipId?.let { selId ->
+            val relationship = state.diagram.relationships.find { it.id == selId }
+            relationship?.let {
+                RelationshipPropertiesContent(
+                    relationship = it,
+                    entities = state.diagram.entities,
+                    onEditRelationship = onEditRelationship,
+                    onAddAttribute = onAddAttribute,
+                    onAddConnection = onAddConnection,
+                    onEditAttribute = onEditAttribute,
+                    onDeleteAttribute = onDeleteAttribute,
+                    onEditConnection = onEditConnection,
+                    onDeleteConnection = onDeleteConnection,
+                    onConvertToAssociativeEntity = onConvertToAssociativeEntity
+                )
             }
-            state.selectedNoteId != null -> {
-                val note = state.diagram.notes.find { it.id == state.selectedNoteId }
-                note?.let {
-                    NotePropertiesContent(
-                        note = it,
-                        onEditNote = onEditNote
-                    )
-                }
+        }
+        state.selectedNoteId?.let { selId ->
+            val note = state.diagram.notes.find { it.id == selId }
+            note?.let {
+                NotePropertiesContent(
+                    note = it,
+                    onEditNote = onEditNote
+                )
             }
         }
     }

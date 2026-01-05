@@ -149,19 +149,17 @@ fun DiagramToolbar(
                                 coroutineScope.launch {
                                     delay(150)
                                     showFileMenu = false
-                                    when {
-                                        state.selectedEntityId != null -> {
-                                            state.deleteEntity(state.selectedEntityId!!)
-                                            onShowSnackbar("Entità eliminata")
-                                        }
-                                        state.selectedRelationshipId != null -> {
-                                            state.deleteRelationship(state.selectedRelationshipId!!)
-                                            onShowSnackbar("Relazione eliminata")
-                                        }
-                                        state.selectedNoteId != null -> {
-                                            state.deleteNote(state.selectedNoteId!!)
-                                            onShowSnackbar("Nota eliminata")
-                                        }
+                                    state.selectedEntityId?.let {
+                                        state.deleteEntity(it)
+                                        onShowSnackbar("Entità eliminata")
+                                    }
+                                    state.selectedRelationshipId?.let {
+                                        state.deleteRelationship(it)
+                                        onShowSnackbar("Relazione eliminata")
+                                    }
+                                    state.selectedNoteId?.let {
+                                        state.deleteNote(it)
+                                        onShowSnackbar("Nota eliminata")
                                     }
                                 }
                             },
@@ -236,12 +234,12 @@ fun DiagramToolbar(
                 }
                 PaletteSelector(
                     selectedPalette = themeState.selectedPalette,
-                    onPaletteSelected = { palette -> themeState.selectPalette(palette) },
+                    onPaletteSelected = themeState::selectPalette,
                     modifier = Modifier.padding(horizontal = 4.dp)
                 )
                 ThemeToggleButton(
                     isDarkTheme = themeState.isDarkTheme,
-                    onToggle = { themeState.toggleTheme() },
+                    onToggle = themeState::toggleTheme,
                     modifier = Modifier.padding(horizontal = 4.dp)
                 )
             }
@@ -303,19 +301,17 @@ fun DiagramToolbar(
                 }
                 IconButton(
                     onClick = {
-                        when {
-                            state.selectedEntityId != null -> {
-                                state.deleteEntity(state.selectedEntityId!!)
-                                onShowSnackbar("Entità eliminata")
-                            }
-                            state.selectedRelationshipId != null -> {
-                                state.deleteRelationship(state.selectedRelationshipId!!)
-                                onShowSnackbar("Relazione eliminata")
-                            }
-                            state.selectedNoteId != null -> {
-                                state.deleteNote(state.selectedNoteId!!)
-                                onShowSnackbar("Nota eliminata")
-                            }
+                        state.selectedEntityId?.let {
+                            state.deleteEntity(it)
+                            onShowSnackbar("Entità eliminata")
+                        }
+                        state.selectedRelationshipId?.let {
+                            state.deleteRelationship(it)
+                            onShowSnackbar("Relazione eliminata")
+                        }
+                        state.selectedNoteId?.let {
+                            state.deleteNote(it)
+                            onShowSnackbar("Nota eliminata")
                         }
                     },
                     enabled = state.selectedEntityId != null || state.selectedRelationshipId != null || state.selectedNoteId != null,

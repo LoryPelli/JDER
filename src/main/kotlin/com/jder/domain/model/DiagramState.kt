@@ -181,8 +181,8 @@ class DiagramState {
         saveState()
         diagram = diagram.copy(
             entities = diagram.entities.filter { it.id != entityId },
-            relationships = diagram.relationships.map { rel ->
-                rel.copy(connections = rel.connections.filter { it.entityId != entityId })
+            relationships = diagram.relationships.map {
+                it.copy(connections = it.connections.filter { it.entityId != entityId })
             }
         )
         if (selectedEntityId == entityId) {
@@ -269,11 +269,11 @@ class DiagramState {
                 relationship
             } else {
                 relationship.copy(
-                    connections = relationship.connections.map { conn ->
-                        if (conn.entityId == oldEntityId) {
+                    connections = relationship.connections.map {
+                        if (it.entityId == oldEntityId) {
                             Connection(entityId = newEntityId, cardinality = newCardinality)
                         } else {
-                            conn
+                            it
                         }
                     }
                 )
@@ -326,10 +326,10 @@ class DiagramState {
     fun convertToAssociativeEntity(relationshipId: String) {
         val relationship = diagram.relationships.find { it.id == relationshipId } ?: return
         if (relationship.connections.size != 2) return
-        val isNtoN = relationship.connections.all { conn ->
-            conn.cardinality == Cardinality.MANY ||
-            conn.cardinality == Cardinality.ZERO_MANY ||
-            conn.cardinality == Cardinality.ONE_MANY
+        val isNtoN = relationship.connections.all {
+            it.cardinality == Cardinality.MANY ||
+            it.cardinality == Cardinality.ZERO_MANY ||
+            it.cardinality == Cardinality.ONE_MANY
         }
         if (!isNtoN) return
         saveState()

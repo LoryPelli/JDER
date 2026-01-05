@@ -115,7 +115,7 @@ fun ContextMenu(
                         leadingIcon = null
                     )
                 }
-                if (onAddConnection != null) {
+                onAddConnection?.let { addConnection ->
                     DropdownMenuItem(
                         text = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -128,13 +128,13 @@ fun ContextMenu(
                             coroutineScope.launch {
                                 delay(150)
                                 onDismiss()
-                                onAddConnection()
+                                addConnection()
                             }
                         },
                         leadingIcon = null
                     )
                 }
-                if (onConvertToAssociativeEntity != null) {
+                onConvertToAssociativeEntity?.let { convertToAssociative ->
                     DropdownMenuItem(
                         text = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -158,7 +158,7 @@ fun ContextMenu(
                                 coroutineScope.launch {
                                     delay(150)
                                     onDismiss()
-                                    onConvertToAssociativeEntity()
+                                    convertToAssociative()
                                 }
                             }
                         },

@@ -9,12 +9,10 @@ class ImageExporter {
         val skiaBitmap = imageBitmap.asSkiaBitmap()
         val image = Image.makeFromBitmap(skiaBitmap)
         val data = image.encodeToData(EncodedImageFormat.PNG)
-        if (data != null) {
-            file.writeBytes(data.bytes)
+        data?.let {
+            file.writeBytes(it.bytes)
             Result.success(Unit)
-        } else {
-            Result.failure(Exception("Impossibile codificare l'immagine"))
-        }
+        } ?: Result.failure(Exception("Impossibile codificare l'immagine"))
     } catch (e: Exception) {
         Result.failure(e)
     }

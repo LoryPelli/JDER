@@ -141,8 +141,8 @@ fun ERDiagramCanvas(
                             adjustedOffset.y <= entity.y + entity.height
                         }
                         val clickedRelationship = if (clickedEntity == null) {
-                            state.diagram.relationships.find { rel ->
-                                isPointInDiamond(adjustedOffset, rel)
+                            state.diagram.relationships.find {
+                                isPointInDiamond(adjustedOffset, it)
                             }
                         } else null
                         val clickedNote = if (clickedEntity == null && clickedRelationship == null) {
@@ -151,19 +151,17 @@ fun ERDiagramCanvas(
                                 adjustedOffset.y >= note.y && adjustedOffset.y <= note.y + note.height
                             }
                         } else null
-                        when {
-                            clickedEntity != null -> {
-                                state.selectEntity(clickedEntity.id)
-                                onContextMenuRequest?.invoke(offset, ContextMenuType.ENTITY)
-                            }
-                            clickedRelationship != null -> {
-                                state.selectRelationship(clickedRelationship.id)
-                                onContextMenuRequest?.invoke(offset, ContextMenuType.RELATIONSHIP)
-                            }
-                            clickedNote != null -> {
-                                state.selectNote(clickedNote.id)
-                                onContextMenuRequest?.invoke(offset, ContextMenuType.NOTE)
-                            }
+                        clickedEntity?.let {
+                            state.selectEntity(it.id)
+                            onContextMenuRequest?.invoke(offset, ContextMenuType.ENTITY)
+                        }
+                        clickedRelationship?.let {
+                            state.selectRelationship(it.id)
+                            onContextMenuRequest?.invoke(offset, ContextMenuType.RELATIONSHIP)
+                        }
+                        clickedNote?.let {
+                            state.selectNote(it.id)
+                            onContextMenuRequest?.invoke(offset, ContextMenuType.NOTE)
                         }
                     }
                 )
@@ -186,8 +184,8 @@ fun ERDiagramCanvas(
                                 adjustedOffset.y <= entity.y + entity.height
                             }
                             val clickedRelationship = if (clickedEntity == null) {
-                                state.diagram.relationships.find { rel ->
-                                    isPointInDiamond(adjustedOffset, rel)
+                                state.diagram.relationships.find {
+                                    isPointInDiamond(adjustedOffset, it)
                                 }
                             } else null
                             val clickedNote = if (clickedEntity == null && clickedRelationship == null) {
@@ -196,20 +194,18 @@ fun ERDiagramCanvas(
                                     adjustedOffset.y >= note.y && adjustedOffset.y <= note.y + note.height
                                 }
                             } else null
-                            when {
-                                clickedEntity != null -> {
-                                    state.selectEntity(clickedEntity.id)
+                                clickedEntity?.let {
+                                    state.selectEntity(it.id)
                                     onContextMenuRequest?.invoke(position, ContextMenuType.ENTITY)
                                 }
-                                clickedRelationship != null -> {
-                                    state.selectRelationship(clickedRelationship.id)
+                                clickedRelationship?.let {
+                                    state.selectRelationship(it.id)
                                     onContextMenuRequest?.invoke(position, ContextMenuType.RELATIONSHIP)
                                 }
-                                clickedNote != null -> {
-                                    state.selectNote(clickedNote.id)
+                                clickedNote?.let {
+                                    state.selectNote(it.id)
                                     onContextMenuRequest?.invoke(position, ContextMenuType.NOTE)
                                 }
-                            }
                         }
                     }
                 }
@@ -858,9 +854,9 @@ private fun DrawScope.drawConnectionsForRelationship(
     val centerY = relationship.y + relationship.height / 2
     relationship.connections.forEach { connection ->
         val entity = entities.find { it.id == connection.entityId }
-        if (entity != null) {
-            val entityCenterX = entity.x + entity.width / 2
-            val entityCenterY = entity.y + entity.height / 2
+        entity?.let {
+            val entityCenterX = it.x + it.width / 2
+            val entityCenterY = it.y + it.height / 2
             drawLine(
                 color = color,
                 start = Offset(centerX, centerY),
@@ -914,25 +910,25 @@ private fun handleCanvasTap(state: DiagramState, offset: Offset) {
             val clickedRelationship = state.diagram.relationships.firstOrNull { rel ->
                 isPointInDiamond(offset, rel)
             }
-            if (clickedRelationship != null) {
-                state.selectRelationship(clickedRelationship.id)
+            clickedRelationship?.let {
+                state.selectRelationship(it.id)
                 return
             }
             val clickedEntity = state.diagram.entities.firstOrNull { entity ->
                 offset.x >= entity.x && offset.x <= entity.x + entity.width &&
                 offset.y >= entity.y && offset.y <= entity.y + entity.height
             }
-            if (clickedEntity != null) {
-                state.selectEntity(clickedEntity.id)
+            clickedEntity?.let {
+                state.selectEntity(it.id)
                 return
             }
             val clickedNote = state.diagram.notes.firstOrNull { note ->
                 offset.x >= note.x && offset.x <= note.x + note.width &&
                 offset.y >= note.y && offset.y <= note.y + note.height
             }
-            if (clickedNote != null) {
-                state.selectNote(clickedNote.id)
-            } else {
+            clickedNote?.let {
+                state.selectNote(it.id)
+            } ?: run {
                 state.clearSelection()
             }
         }
@@ -976,15 +972,15 @@ private fun handleDragStart(state: DiagramState, offset: Offset): Triple<String?
             }
         }
     }
-    state.diagram.relationships.forEach { rel ->
-        rel.attributes.forEachIndexed { index, attribute ->
+    state.diagram.relationships.forEach { relationship ->
+        relationship.attributes.forEachIndexed { index, attribute ->
             val attrPos = calculateAttributePosition(
-                rel.x,
-                rel.y,
-                rel.width,
-                rel.height,
+                relationship.x,
+                relationship.y,
+                relationship.width,
+                relationship.height,
                 index,
-                rel.attributes.size,
+                relationship.attributes.size,
                 attribute
             )
             val distance = sqrt(
@@ -993,7 +989,7 @@ private fun handleDragStart(state: DiagramState, offset: Offset): Triple<String?
             )
             if (distance <= 30f) {
                 state.saveDragStartState()
-                return Triple(attribute.id, null, rel.id)
+                return Triple(attribute.id, null, relationship.id)
             }
         }
     }
@@ -1001,16 +997,16 @@ private fun handleDragStart(state: DiagramState, offset: Offset): Triple<String?
         adjustedOffset.x >= entity.x && adjustedOffset.x <= entity.x + entity.width &&
         adjustedOffset.y >= entity.y && adjustedOffset.y <= entity.y + entity.height
     }
-    if (entity != null) {
-        state.selectEntity(entity.id)
+    entity?.let {
+        state.selectEntity(it.id)
         state.saveDragStartState()
         return Triple(null, null, null)
     }
     val relationship = state.diagram.relationships.find { rel ->
         isPointInDiamond(adjustedOffset, rel)
     }
-    if (relationship != null) {
-        state.selectRelationship(relationship.id)
+    relationship?.let {
+        state.selectRelationship(it.id)
         state.saveDragStartState()
         return Triple(null, null, null)
     }
@@ -1018,8 +1014,8 @@ private fun handleDragStart(state: DiagramState, offset: Offset): Triple<String?
         adjustedOffset.x >= note.x && adjustedOffset.x <= note.x + note.width &&
         adjustedOffset.y >= note.y && adjustedOffset.y <= note.y + note.height
     }
-    if (note != null) {
-        state.selectNote(note.id)
+    note?.let {
+        state.selectNote(it.id)
         state.saveDragStartState()
         return Triple(null, null, null)
     }
@@ -1032,11 +1028,12 @@ private fun handleDrag(
     draggedAttributeForEntity: String?,
     draggedAttributeForRelationship: String?
 ) {
-    if (draggedAttributeId != null && draggedAttributeForEntity != null) {
-        state.updateEntityWithoutSave(draggedAttributeForEntity) { entity ->
-            entity.copy(
-                attributes = entity.attributes.mapIndexed { index, attr ->
-                    if (attr.id == draggedAttributeId) {
+    draggedAttributeId?.let { attrId ->
+        draggedAttributeForEntity?.let {
+            state.updateEntityWithoutSave(it) { entity ->
+                entity.copy(
+                    attributes = entity.attributes.mapIndexed { index, attr ->
+                        if (attr.id == attrId) {
                         val centerX = entity.x + entity.width / 2
                         val centerY = entity.y + entity.height / 2
                         val currentAttrX = if (attr.x == 0f && attr.y == 0f) {
@@ -1073,13 +1070,15 @@ private fun handleDrag(
                 }
             )
         }
-        return
+            return
+        }
     }
-    if (draggedAttributeId != null && draggedAttributeForRelationship != null) {
-        state.updateRelationshipWithoutSave(draggedAttributeForRelationship) { rel ->
+    draggedAttributeId?.let { attrId ->
+        draggedAttributeForRelationship?.let {
+            state.updateRelationshipWithoutSave(it) { rel ->
             rel.copy(
                 attributes = rel.attributes.mapIndexed { index, attr ->
-                    if (attr.id == draggedAttributeId) {
+                    if (attr.id == attrId) {
                         val centerX = rel.x + rel.width / 2
                         val centerY = rel.y + rel.height / 2
                         val currentAttrX = if (attr.x == 0f && attr.y == 0f) {
@@ -1116,26 +1115,27 @@ private fun handleDrag(
                 }
             )
         }
-        return
+            return
+        }
     }
-    state.selectedEntityId?.let { entityId ->
-        state.updateEntityWithoutSave(entityId) { entity ->
+    state.selectedEntityId?.let {
+        state.updateEntityWithoutSave(it) { entity ->
             entity.copy(
                 x = entity.x + dragAmount.x / state.zoom,
                 y = entity.y + dragAmount.y / state.zoom
             )
         }
     }
-    state.selectedRelationshipId?.let { relId ->
-        state.updateRelationshipWithoutSave(relId) { rel ->
+    state.selectedRelationshipId?.let {
+        state.updateRelationshipWithoutSave(it) { rel ->
             rel.copy(
                 x = rel.x + dragAmount.x / state.zoom,
                 y = rel.y + dragAmount.y / state.zoom
             )
         }
     }
-    state.selectedNoteId?.let { noteId ->
-        state.updateNoteWithoutSave(noteId) { note ->
+    state.selectedNoteId?.let {
+        state.updateNoteWithoutSave(it) { note ->
             note.copy(
                 x = note.x + dragAmount.x / state.zoom,
                 y = note.y + dragAmount.y / state.zoom

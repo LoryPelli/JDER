@@ -86,16 +86,16 @@ fun MainScreen(
         focusRequester.requestFocus()
     }
     LaunchedEffect(snackbarMessage) {
-        snackbarMessage?.let { message ->
-            snackbarHostState.showSnackbar(message)
+        snackbarMessage?.let {
+            snackbarHostState.showSnackbar(it)
             snackbarMessage = null
         }
     }
     Scaffold(
         snackbarHost = {
-            SnackbarHost(snackbarHostState) { data ->
+            SnackbarHost(snackbarHostState) {
                 Snackbar(
-                    snackbarData = data,
+                    snackbarData = it,
                     containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.onSurface,
                     actionColor = MaterialTheme.colorScheme.primary
@@ -140,8 +140,8 @@ fun MainScreen(
                         true
                     }
                     keyEvent.isCtrlPressed && keyEvent.key == Key.S -> {
-                        if (state.currentFile != null) {
-                            val file = File(state.currentFile!!)
+                        state.currentFile?.let {
+                            val file = File(it)
                             val updatedDiagram = state.diagram.copy(name = file.nameWithoutExtension)
                             repository.saveDiagram(updatedDiagram, file).fold(
                                 onSuccess = {
@@ -149,28 +149,26 @@ fun MainScreen(
                                     state.markAsSaved(file.absolutePath)
                                     snackbarMessage = "Diagramma salvato: ${file.name}"
                                 },
-                                onFailure = { error -> snackbarMessage = "Errore nel salvataggio: ${error.message}" }
+                                onFailure = { snackbarMessage = "Errore nel salvataggio: ${it.message}" }
                             )
-                        } else {
+                        } ?: run {
                             showSaveAsDialog = true
                         }
                         true
                     }
                     keyEvent.key == Key.Delete || keyEvent.key == Key.Backspace -> {
-                        when {
-                            state.selectedEntityId != null -> {
-                                state.deleteEntity(state.selectedEntityId!!)
-                                snackbarMessage = "Entità eliminata"
-                            }
-                            state.selectedRelationshipId != null -> {
-                                state.deleteRelationship(state.selectedRelationshipId!!)
-                                snackbarMessage = "Relazione eliminata"
-                            }
-                            state.selectedNoteId != null -> {
-                                state.deleteNote(state.selectedNoteId!!)
-                                snackbarMessage = "Nota eliminata"
-                            }
-                        }
+                                state.selectedEntityId?.let {
+                                    state.deleteEntity(it)
+                                    snackbarMessage = "Entità eliminata"
+                                }
+                                state.selectedRelationshipId?.let {
+                                    state.deleteRelationship(it)
+                                    snackbarMessage = "Relazione eliminata"
+                                }
+                                state.selectedNoteId?.let {
+                                    state.deleteNote(it)
+                                    snackbarMessage = "Nota eliminata"
+                                }
                         true
                     }
                     keyEvent.isCtrlPressed && keyEvent.key == Key.Plus -> {
@@ -216,8 +214,8 @@ fun MainScreen(
                     }
                 },
                 onSaveDiagram = {
-                    if (state.currentFile != null) {
-                        val file = File(state.currentFile!!)
+                    state.currentFile?.let {
+                        val file = File(it)
                         val updatedDiagram = state.diagram.copy(name = file.nameWithoutExtension)
                         repository.saveDiagram(updatedDiagram, file).fold(
                             onSuccess = {
@@ -225,11 +223,11 @@ fun MainScreen(
                                 state.markAsSaved(file.absolutePath)
                                 snackbarMessage = "Diagramma salvato: ${file.name}"
                             },
-                            onFailure = { error ->
-                                snackbarMessage = "Errore nel salvataggio: ${error.message}"
+                            onFailure = {
+                                snackbarMessage = "Errore nel salvataggio: ${it.message}"
                             }
                         )
-                    } else {
+                    } ?: run {
                         showSaveAsDialog = true
                     }
                 },
@@ -290,8 +288,8 @@ fun MainScreen(
                     val selectedRelationship = if (contextMenuType == ContextMenuType.RELATIONSHIP && state.selectedRelationshipId != null) {
                         state.diagram.relationships.find { it.id == state.selectedRelationshipId }
                     } else null
-                    val isNtoN = selectedRelationship?.let { relationship ->
-                        relationship.connections.size == 2 && relationship.connections.all { conn ->
+                    val isNtoN = selectedRelationship?.let {
+                        it.connections.size == 2 && it.connections.all { conn ->
                             conn.cardinality == Cardinality.MANY ||
                             conn.cardinality == Cardinality.ZERO_MANY ||
                             conn.cardinality == Cardinality.ONE_MANY
@@ -347,8 +345,8 @@ fun MainScreen(
                         onConvertToAssociativeEntity = if (contextMenuType == ContextMenuType.RELATIONSHIP) {
                             {
                                 showContextMenu = false
-                                state.selectedRelationshipId?.let { relId ->
-                                    state.convertToAssociativeEntity(relId)
+                                state.selectedRelationshipId?.let {
+                                    state.convertToAssociativeEntity(it)
                                     snackbarMessage = "Relazione convertita in entità associativa"
                                 }
                             }
@@ -376,15 +374,13 @@ fun MainScreen(
                             showEditAttributeDialog = true
                         },
                         onDeleteAttribute = { attrId ->
-                            when {
-                                state.selectedEntityId != null -> {
-                                    state.deleteAttributeFromEntity(state.selectedEntityId!!, attrId)
-                                    snackbarMessage = "Attributo eliminato"
-                                }
-                                state.selectedRelationshipId != null -> {
-                                    state.deleteAttributeFromRelationship(state.selectedRelationshipId!!, attrId)
-                                    snackbarMessage = "Attributo eliminato"
-                                }
+                            state.selectedEntityId?.let { entityId ->
+                                state.deleteAttributeFromEntity(entityId, attrId)
+                                snackbarMessage = "Attributo eliminato"
+                            }
+                            state.selectedRelationshipId?.let { relationshipId ->
+                                state.deleteAttributeFromRelationship(relationshipId, attrId)
+                                snackbarMessage = "Attributo eliminato"
                             }
                         },
                         onEditConnection = { entityId, conn ->
@@ -392,14 +388,14 @@ fun MainScreen(
                             showEditConnectionDialog = true
                         },
                         onDeleteConnection = { entityId ->
-                            state.selectedRelationshipId?.let { relId ->
-                                state.deleteConnection(relId, entityId)
+                            state.selectedRelationshipId?.let {
+                                state.deleteConnection(it, entityId)
                                 snackbarMessage = "Connessione eliminata"
                             }
                         },
                         onConvertToAssociativeEntity = {
-                            state.selectedRelationshipId?.let { relId ->
-                                state.convertToAssociativeEntity(relId)
+                            state.selectedRelationshipId?.let {
+                                state.convertToAssociativeEntity(it)
                                 snackbarMessage = "Relazione convertita in entità associativa"
                             }
                         },
@@ -413,7 +409,7 @@ fun MainScreen(
             }
         }
     }
-    if (showEntityDialog && state.selectedEntityId != null) {
+    if (showEntityDialog) {
         val entity = state.diagram.entities.find { it.id == state.selectedEntityId }
         entity?.let {
             EntityPropertiesDialog(
@@ -426,7 +422,7 @@ fun MainScreen(
             )
         }
     }
-    if (showRelationshipDialog && state.selectedRelationshipId != null) {
+    if (showRelationshipDialog) {
         val relationship = state.diagram.relationships.find { it.id == state.selectedRelationshipId }
         relationship?.let {
             RelationshipPropertiesDialog(
@@ -439,7 +435,7 @@ fun MainScreen(
             )
         }
     }
-    if (showNoteDialog && state.selectedNoteId != null) {
+    if (showNoteDialog) {
         val note = state.diagram.notes.find { it.id == state.selectedNoteId }
         note?.let {
             NotePropertiesDialog(
@@ -457,90 +453,94 @@ fun MainScreen(
         AddAttributeDialog(
             onDismiss = { showAddAttributeDialog = false },
             onAdd = { attribute ->
-                when {
-                    state.selectedEntityId != null -> {
-                        state.addAttributeToEntity(state.selectedEntityId!!, attribute)
-                    }
-                    state.selectedRelationshipId != null -> {
-                        state.addAttributeToRelationship(state.selectedRelationshipId!!, attribute)
-                    }
+                state.selectedEntityId?.let {
+                    state.addAttributeToEntity(it, attribute)
+                }
+                state.selectedRelationshipId?.let {
+                    state.addAttributeToRelationship(it, attribute)
                 }
                 showAddAttributeDialog = false
                 snackbarMessage = "Attributo aggiunto"
             }
         )
     }
-    if (showEditAttributeDialog && attributeToEdit != null) {
-        EditAttributeDialog(
-            attribute = attributeToEdit!!,
-            onDismiss = {
-                showEditAttributeDialog = false
-                attributeToEdit = null
-            },
-            onSave = { updatedAttribute ->
-                when {
-                    state.selectedEntityId != null -> {
+    if (showEditAttributeDialog) {
+        attributeToEdit?.let { attribute ->
+            EditAttributeDialog(
+                attribute = attribute,
+                onDismiss = {
+                    showEditAttributeDialog = false
+                    attributeToEdit = null
+                },
+                onSave = { updatedAttribute ->
+                    state.selectedEntityId?.let {
                         state.updateAttributeInEntity(
-                            state.selectedEntityId!!,
-                            attributeToEdit!!.id,
+                            it,
+                            attribute.id,
                             updatedAttribute
                         )
                     }
-                    state.selectedRelationshipId != null -> {
+                    state.selectedRelationshipId?.let {
                         state.updateAttributeInRelationship(
-                            state.selectedRelationshipId!!,
-                            attributeToEdit!!.id,
+                            it,
+                            attribute.id,
                             updatedAttribute
                         )
                     }
+                    showEditAttributeDialog = false
+                    attributeToEdit = null
+                    snackbarMessage = "Attributo modificato"
                 }
-                showEditAttributeDialog = false
-                attributeToEdit = null
-                snackbarMessage = "Attributo modificato"
-            }
-        )
+            )
+        }
     }
-    if (showCreateConnectionDialog && state.selectedRelationshipId != null) {
-        val selectedRelationship = state.diagram.relationships.find { it.id == state.selectedRelationshipId }
-        val connectedEntityIds = selectedRelationship?.connections?.map { it.entityId }?.toSet() ?: emptySet()
-        val availableEntities = state.diagram.entities.filter { it.id !in connectedEntityIds }
-        CreateConnectionDialog(
-            entities = availableEntities,
-            onDismiss = { showCreateConnectionDialog = false },
-            onCreate = { entityId, cardinality ->
-                state.addConnection(state.selectedRelationshipId!!, entityId, cardinality)
-                showCreateConnectionDialog = false
-                snackbarMessage = "Connessione creata"
-            }
-        )
+    if (showCreateConnectionDialog) {
+        state.selectedRelationshipId?.let { relationshipId ->
+            val selectedRelationship = state.diagram.relationships.find { it.id == relationshipId }
+            val connectedEntityIds = selectedRelationship?.connections?.map { it.entityId }?.toSet() ?: emptySet()
+            val availableEntities = state.diagram.entities.filter { it.id !in connectedEntityIds }
+            CreateConnectionDialog(
+                entities = availableEntities,
+                onDismiss = { showCreateConnectionDialog = false },
+                onCreate = { entityId, cardinality ->
+                    state.addConnection(relationshipId, entityId, cardinality)
+                    showCreateConnectionDialog = false
+                    snackbarMessage = "Connessione creata"
+                }
+            )
+        }
     }
-    if (showEditConnectionDialog && connectionToEdit != null && state.selectedRelationshipId != null) {
-        val selectedRelationship = state.diagram.relationships.find { it.id == state.selectedRelationshipId }
-        val connectedEntityIds = selectedRelationship?.connections
-            ?.map { it.entityId }
-            ?.filter { it != connectionToEdit!!.first }
-            ?.toSet() ?: emptySet()
-        val availableEntities = state.diagram.entities.filter { it.id !in connectedEntityIds }
-        EditConnectionDialog(
-            entities = availableEntities,
-            currentEntityId = connectionToEdit!!.first,
-            currentCardinality = connectionToEdit!!.second.cardinality,
-            onDismiss = {
-                showEditConnectionDialog = false
-                connectionToEdit = null
-            },
-            onSave = { newEntityId, newCardinality ->
-                state.updateConnection(
-                    state.selectedRelationshipId!!,
-                    connectionToEdit!!.first,
-                    newEntityId,
-                    newCardinality
+    if (showEditConnectionDialog) {
+        connectionToEdit?.let { connection ->
+            state.selectedRelationshipId?.let { relationshipId ->
+                val selectedRelationship = state.diagram.relationships.find { it.id == relationshipId }
+                val connectedEntityIds = selectedRelationship?.connections
+                    ?.map { it.entityId }
+                    ?.filter { it != connection.first }
+                    ?.toSet() ?: emptySet()
+                val availableEntities = state.diagram.entities.filter { it.id !in connectedEntityIds }
+                EditConnectionDialog(
+                    entities = availableEntities,
+                    currentEntityId = connection.first,
+                    currentCardinality = connection.second.cardinality,
+                    onDismiss = {
+                        showEditConnectionDialog = false
+                        connectionToEdit = null
+                    },
+                    onSave = { newEntityId, newCardinality ->
+                        state.updateConnection(
+                            relationshipId,
+                            connection.first,
+                            newEntityId,
+                            newCardinality
+                        )
+                        showEditConnectionDialog = false
+                        connectionToEdit = null
+                        snackbarMessage = "Connessione modificata"
+                    }
                 )
-                showEditConnectionDialog = false
-                connectionToEdit = null
-                snackbarMessage = "Connessione modificata"
             }
-        )
+        }
     }
     if (showNewDiagramConfirmDialog) {
         AlertDialog(
@@ -597,12 +597,12 @@ fun MainScreen(
             onFileSelected = { file ->
                 showOpenDialog = false
                 repository.loadDiagram(file).fold(
-                    onSuccess = { diagram ->
-                        state.loadDiagram(diagram, file.absolutePath)
+                    onSuccess = {
+                        state.loadDiagram(it, file.absolutePath)
                         snackbarMessage = "Diagramma caricato: ${file.name}"
                     },
-                    onFailure = { error ->
-                        snackbarMessage = "Errore nel caricamento: ${error.message}"
+                    onFailure = {
+                        snackbarMessage = "Errore nel caricamento: ${it.message}"
                     }
                 )
             }
@@ -630,8 +630,8 @@ fun MainScreen(
                         state.markAsSaved(finalFile.absolutePath)
                         snackbarMessage = "Diagramma salvato: ${finalFile.name}"
                     },
-                    onFailure = { error ->
-                        snackbarMessage = "Errore nel salvataggio: ${error.message}"
+                    onFailure = {
+                        snackbarMessage = "Errore nel salvataggio: ${it.message}"
                     }
                 )
             }
@@ -656,8 +656,8 @@ fun MainScreen(
                         onSuccess = {
                             snackbarMessage = "Immagine salvata: ${pngFile.name}"
                         },
-                        onFailure = { error ->
-                            snackbarMessage = "Errore nell'esportazione: ${error.message}"
+                        onFailure = {
+                            snackbarMessage = "Errore nell'esportazione: ${it.message}"
                         }
                     )
                 } catch (e: Exception) {

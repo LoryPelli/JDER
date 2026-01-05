@@ -298,9 +298,9 @@ fun FileManagerDialog(
                         },
                         isError = errorMessage != null
                     )
-                    if (errorMessage != null) {
+                    errorMessage?.let { message ->
                         Text(
-                            text = errorMessage!!,
+                            text = message,
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(start = 16.dp, top = 4.dp)

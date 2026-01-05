@@ -50,18 +50,18 @@ fun renderDiagramToBitmap(diagram: ERDiagram): ImageBitmap {
             }
         }
     }
-    relationships.forEach { rel ->
-        allXCoords.add(rel.x)
-        allXCoords.add(rel.x + rel.width)
-        allYCoords.add(rel.y)
-        allYCoords.add(rel.y + rel.height)
-        rel.attributes.forEachIndexed { index, attr ->
-            val centerX = rel.x + rel.width / 2
-            val centerY = rel.y + rel.height / 2
+    relationships.forEach { relationship ->
+        allXCoords.add(relationship.x)
+        allXCoords.add(relationship.x + relationship.width)
+        allYCoords.add(relationship.y)
+        allYCoords.add(relationship.y + relationship.height)
+        relationship.attributes.forEachIndexed { index, attr ->
+            val centerX = relationship.x + relationship.width / 2
+            val centerY = relationship.y + relationship.height / 2
             val arrowLength = 60f
             val verticalSpacing = 60f
-            val startY = centerY - ((rel.attributes.size - 1) * verticalSpacing / 2f)
-            val defaultAttrX = rel.x + rel.width + arrowLength
+            val startY = centerY - ((relationship.attributes.size - 1) * verticalSpacing / 2f)
+            val defaultAttrX = relationship.x + relationship.width + arrowLength
             val defaultAttrY = startY + (index * verticalSpacing)
             val attrX = if (attr.x != 0f) centerX + attr.x else defaultAttrX
             val attrY = if (attr.y != 0f) centerY + attr.y else defaultAttrY
