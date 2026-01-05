@@ -21,7 +21,7 @@ fun renderDiagramToBitmap(diagram: ERDiagram): ImageBitmap {
         allXCoords.add(entity.x + entity.width)
         allYCoords.add(entity.y)
         allYCoords.add(entity.y + entity.height)
-        entity.attributes.forEachIndexed { index, attr ->
+        entity.attributes.forEachIndexed { index, attribute ->
             val centerX = entity.x + entity.width / 2
             val centerY = entity.y + entity.height / 2
             val arrowLength = 60f
@@ -29,17 +29,17 @@ fun renderDiagramToBitmap(diagram: ERDiagram): ImageBitmap {
             val startY = centerY - ((entity.attributes.size - 1) * verticalSpacing / 2f)
             val defaultAttrX = entity.x + entity.width + arrowLength
             val defaultAttrY = startY + (index * verticalSpacing)
-            val attrX = if (attr.x != 0f) centerX + attr.x else defaultAttrX
-            val attrY = if (attr.y != 0f) centerY + attr.y else defaultAttrY
+            val attrX = if (attribute.x != 0f) centerX + attribute.x else defaultAttrX
+            val attrY = if (attribute.y != 0f) centerY + attribute.y else defaultAttrY
             allXCoords.add(attrX - 20)
             allXCoords.add(attrX + 150)
             allYCoords.add(attrY - 20)
             allYCoords.add(attrY + 20)
-            if (attr.type == AttributeType.COMPOSITE && attr.components.isNotEmpty()) {
-                attr.components.forEachIndexed { compIndex, _ ->
+            if (attribute.type == AttributeType.COMPOSITE && attribute.components.isNotEmpty()) {
+                attribute.components.forEachIndexed { compIndex, _ ->
                     val horizontalSpacing = 60f
                     val compVerticalSpacing = 40f
-                    val compStartY = attrY - ((attr.components.size - 1) * compVerticalSpacing / 2f)
+                    val compStartY = attrY - ((attribute.components.size - 1) * compVerticalSpacing / 2f)
                     val compX = attrX + 20 + horizontalSpacing
                     val compY = compStartY + (compIndex * compVerticalSpacing)
                     allXCoords.add(compX - 12)
@@ -55,7 +55,7 @@ fun renderDiagramToBitmap(diagram: ERDiagram): ImageBitmap {
         allXCoords.add(relationship.x + relationship.width)
         allYCoords.add(relationship.y)
         allYCoords.add(relationship.y + relationship.height)
-        relationship.attributes.forEachIndexed { index, attr ->
+        relationship.attributes.forEachIndexed { index, attribute ->
             val centerX = relationship.x + relationship.width / 2
             val centerY = relationship.y + relationship.height / 2
             val arrowLength = 60f
@@ -63,17 +63,17 @@ fun renderDiagramToBitmap(diagram: ERDiagram): ImageBitmap {
             val startY = centerY - ((relationship.attributes.size - 1) * verticalSpacing / 2f)
             val defaultAttrX = relationship.x + relationship.width + arrowLength
             val defaultAttrY = startY + (index * verticalSpacing)
-            val attrX = if (attr.x != 0f) centerX + attr.x else defaultAttrX
-            val attrY = if (attr.y != 0f) centerY + attr.y else defaultAttrY
+            val attrX = if (attribute.x != 0f) centerX + attribute.x else defaultAttrX
+            val attrY = if (attribute.y != 0f) centerY + attribute.y else defaultAttrY
             allXCoords.add(attrX - 20)
             allXCoords.add(attrX + 150)
             allYCoords.add(attrY - 20)
             allYCoords.add(attrY + 20)
-            if (attr.type == AttributeType.COMPOSITE && attr.components.isNotEmpty()) {
-                attr.components.forEachIndexed { compIndex, _ ->
+            if (attribute.type == AttributeType.COMPOSITE && attribute.components.isNotEmpty()) {
+                attribute.components.forEachIndexed { compIndex, _ ->
                     val horizontalSpacing = 60f
                     val compVerticalSpacing = 40f
-                    val compStartY = attrY - ((attr.components.size - 1) * compVerticalSpacing / 2f)
+                    val compStartY = attrY - ((attribute.components.size - 1) * compVerticalSpacing / 2f)
                     val compX = attrX + 20 + horizontalSpacing
                     val compY = compStartY + (compIndex * compVerticalSpacing)
                     allXCoords.add(compX - 12)
@@ -84,11 +84,11 @@ fun renderDiagramToBitmap(diagram: ERDiagram): ImageBitmap {
             }
         }
     }
-    diagram.notes.forEach { note ->
-        allXCoords.add(note.x)
-        allXCoords.add(note.x + note.width)
-        allYCoords.add(note.y)
-        allYCoords.add(note.y + note.height)
+    diagram.notes.forEach {
+        allXCoords.add(it.x)
+        allXCoords.add(it.x + it.width)
+        allYCoords.add(it.y)
+        allYCoords.add(it.y + it.height)
     }
     val minX = (allXCoords.minOrNull() ?: 0f) - padding
     val minY = (allYCoords.minOrNull() ?: 0f) - padding
@@ -109,17 +109,16 @@ fun renderDiagramToBitmap(diagram: ERDiagram): ImageBitmap {
     relationships.forEach { relationship ->
         val centerX = (relationship.x + relationship.width / 2 + offsetX).toInt()
         val centerY = (relationship.y + relationship.height / 2 + offsetY).toInt()
-        relationship.connections.forEach { conn ->
-            val entity = entities.find { it.id == conn.entityId }
-            entity?.let {
-                val entityCenterX = (it.x + it.width / 2 + offsetX).toInt()
-                val entityCenterY = (it.y + it.height / 2 + offsetY).toInt()
+        relationship.connections.forEach {
+            entities.find { entity -> entity.id == it.entityId }?.let { entityForConnection ->
+                val entityCenterX = (entityForConnection.x + entityForConnection.width / 2 + offsetX).toInt()
+                val entityCenterY = (entityForConnection.y + entityForConnection.height / 2 + offsetY).toInt()
                 g2d.drawLine(centerX, centerY, entityCenterX, entityCenterY)
                 val labelX = (centerX + entityCenterX) / 2
                 val labelY = (centerY + entityCenterY) / 2
                 g2d.font = Font("Arial", Font.BOLD, 14)
                 g2d.color = Color(0x222222)
-                g2d.drawString(conn.cardinality.display, labelX - 10, labelY)
+                g2d.drawString(it.cardinality.display, labelX - 10, labelY)
                 g2d.color = Color(0xBDBDBD)
             }
         }
@@ -335,11 +334,11 @@ fun renderDiagramToBitmap(diagram: ERDiagram): ImageBitmap {
             }
         }
     }
-    diagram.notes.forEach { note ->
-        val x = (note.x + offsetX).toInt()
-        val y = (note.y + offsetY).toInt()
-        val w = note.width.toInt()
-        val h = note.height.toInt()
+    diagram.notes.forEach {
+        val x = (it.x + offsetX).toInt()
+        val y = (it.y + offsetY).toInt()
+        val w = it.width.toInt()
+        val h = it.height.toInt()
         g2d.color = Color(255, 235, 59)
         g2d.fillRect(x, y, w, h)
         g2d.color = Color(251, 192, 45)
@@ -361,7 +360,7 @@ fun renderDiagramToBitmap(diagram: ERDiagram): ImageBitmap {
         val availableHeight = h - (notePadding * 2)
         val wrappedLines = mutableListOf<String>()
         var currentLine = ""
-        note.text.forEach { char ->
+        it.text.forEach { char ->
             val testLine = currentLine + char
             val testWidth = fm.stringWidth(testLine)
             if (testWidth <= availableWidth) {

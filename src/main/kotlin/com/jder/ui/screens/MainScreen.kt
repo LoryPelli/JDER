@@ -369,22 +369,22 @@ fun MainScreen(
                         onEditNote = { showNoteDialog = true },
                         onAddAttribute = { showAddAttributeDialog = true },
                         onAddConnection = { showCreateConnectionDialog = true },
-                        onEditAttribute = { attr ->
-                            attributeToEdit = attr
+                        onEditAttribute = { attribute ->
+                            attributeToEdit = attribute
                             showEditAttributeDialog = true
                         },
-                        onDeleteAttribute = { attrId ->
+                        onDeleteAttribute = { attributeId ->
                             state.selectedEntityId?.let { entityId ->
-                                state.deleteAttributeFromEntity(entityId, attrId)
+                                state.deleteAttributeFromEntity(entityId, attributeId)
                                 snackbarMessage = "Attributo eliminato"
                             }
                             state.selectedRelationshipId?.let { relationshipId ->
-                                state.deleteAttributeFromRelationship(relationshipId, attrId)
+                                state.deleteAttributeFromRelationship(relationshipId, attributeId)
                                 snackbarMessage = "Attributo eliminato"
                             }
                         },
-                        onEditConnection = { entityId, conn ->
-                            connectionToEdit = Pair(entityId, conn)
+                        onEditConnection = { entityId, connection ->
+                            connectionToEdit = Pair(entityId, connection)
                             showEditConnectionDialog = true
                         },
                         onDeleteConnection = { entityId ->
@@ -660,8 +660,8 @@ fun MainScreen(
                             snackbarMessage = "Errore nell'esportazione: ${it.message}"
                         }
                     )
-                } catch (e: Exception) {
-                    snackbarMessage = "Errore nell'esportazione: ${e.message}"
+                } catch (exception: Exception) {
+                    snackbarMessage = "Errore nell'esportazione: ${exception.message}"
                 }
             }
         )

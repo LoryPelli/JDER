@@ -176,11 +176,11 @@ private fun EntityPropertiesContent(
     if (entity.attributes.isNotEmpty()) {
         Spacer(Modifier.height(8.dp))
         Text("Attributi:", style = MaterialTheme.typography.titleSmall)
-        entity.attributes.forEach { attr ->
+        entity.attributes.forEach {
             AttributeCard(
-                attribute = attr,
-                onEdit = { onEditAttribute(attr) },
-                onDelete = { onDeleteAttribute(attr.id) }
+                attribute = it,
+                onEdit = { onEditAttribute(it) },
+                onDelete = { onDeleteAttribute(it.id) }
             )
         }
     }
@@ -202,10 +202,10 @@ private fun RelationshipPropertiesContent(
     onDeleteConnection: (String) -> Unit,
     onConvertToAssociativeEntity: () -> Unit
 ) {
-    val isNtoN = relationship.connections.size == 2 && relationship.connections.all { conn ->
-        conn.cardinality == Cardinality.MANY ||
-        conn.cardinality == Cardinality.ZERO_MANY ||
-        conn.cardinality == Cardinality.ONE_MANY
+    val isNtoN = relationship.connections.size == 2 && relationship.connections.all {
+        it.cardinality == Cardinality.MANY ||
+        it.cardinality == Cardinality.ZERO_MANY ||
+        it.cardinality == Cardinality.ONE_MANY
     }
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -264,24 +264,24 @@ private fun RelationshipPropertiesContent(
     if (relationship.attributes.isNotEmpty()) {
         Spacer(Modifier.height(8.dp))
         Text("Attributi:", style = MaterialTheme.typography.titleSmall)
-        relationship.attributes.forEach { attr ->
+        relationship.attributes.forEach {
             AttributeCard(
-                attribute = attr,
-                onEdit = { onEditAttribute(attr) },
-                onDelete = { onDeleteAttribute(attr.id) }
+                attribute = it,
+                onEdit = { onEditAttribute(it) },
+                onDelete = { onDeleteAttribute(it.id) }
             )
         }
     }
     if (relationship.connections.isNotEmpty()) {
         Spacer(Modifier.height(8.dp))
         Text("Connessioni:", style = MaterialTheme.typography.titleSmall)
-        relationship.connections.forEach { conn ->
-            val connectedEntity = entities.find { e -> e.id == conn.entityId }
+        relationship.connections.forEach {
+            val connectedEntity = entities.find { entity -> entity.id == it.entityId }
             ConnectionCard(
-                connection = conn,
+                connection = it,
                 entityName = connectedEntity?.name ?: "Entità sconosciuta",
-                onEdit = { onEditConnection(conn.entityId, conn) },
-                onDelete = { onDeleteConnection(conn.entityId) }
+                onEdit = { onEditConnection(it.entityId, it) },
+                onDelete = { onDeleteConnection(it.entityId) }
             )
         }
     }

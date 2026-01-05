@@ -96,11 +96,11 @@ private fun ConnectionDialog(
                             expanded = expandedEntity,
                             onDismissRequest = { expandedEntity = false }
                         ) {
-                            entities.forEach { entity ->
+                            entities.forEach {
                                 DropdownMenuItem(
-                                    text = { Text(entity.name) },
+                                    text = { Text(it.name) },
                                     onClick = {
-                                        selectedEntity = entity
+                                        selectedEntity = it
                                         expandedEntity = false
                                     }
                                 )
@@ -123,11 +123,11 @@ private fun ConnectionDialog(
                             expanded = expandedCardinality,
                             onDismissRequest = { expandedCardinality = false }
                         ) {
-                            Cardinality.entries.forEach { cardinality ->
+                            Cardinality.entries.forEach {
                                 DropdownMenuItem(
-                                    text = { Text(cardinality.display) },
+                                    text = { Text(it.display) },
                                     onClick = {
-                                        selectedCardinality = cardinality
+                                        selectedCardinality = it
                                         expandedCardinality = false
                                     }
                                 )
