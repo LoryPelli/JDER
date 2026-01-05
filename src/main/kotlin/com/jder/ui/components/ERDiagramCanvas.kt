@@ -194,18 +194,18 @@ fun ERDiagramCanvas(
                                     adjustedOffset.y >= note.y && adjustedOffset.y <= note.y + note.height
                                 }
                             } else null
-                                clickedEntity?.let {
-                                    state.selectEntity(it.id)
-                                    onContextMenuRequest?.invoke(position, ContextMenuType.ENTITY)
-                                }
-                                clickedRelationship?.let {
-                                    state.selectRelationship(it.id)
-                                    onContextMenuRequest?.invoke(position, ContextMenuType.RELATIONSHIP)
-                                }
-                                clickedNote?.let {
-                                    state.selectNote(it.id)
-                                    onContextMenuRequest?.invoke(position, ContextMenuType.NOTE)
-                                }
+                            clickedEntity?.let {
+                                state.selectEntity(it.id)
+                                onContextMenuRequest?.invoke(position, ContextMenuType.ENTITY)
+                            }
+                            clickedRelationship?.let {
+                                state.selectRelationship(it.id)
+                                onContextMenuRequest?.invoke(position, ContextMenuType.RELATIONSHIP)
+                            }
+                            clickedNote?.let {
+                                state.selectNote(it.id)
+                                onContextMenuRequest?.invoke(position, ContextMenuType.NOTE)
+                            }
                         }
                     }
                 }

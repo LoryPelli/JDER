@@ -157,18 +157,18 @@ fun MainScreen(
                         true
                     }
                     keyEvent.key == Key.Delete || keyEvent.key == Key.Backspace -> {
-                                state.selectedEntityId?.let {
-                                    state.deleteEntity(it)
-                                    snackbarMessage = "Entità eliminata"
-                                }
-                                state.selectedRelationshipId?.let {
-                                    state.deleteRelationship(it)
-                                    snackbarMessage = "Relazione eliminata"
-                                }
-                                state.selectedNoteId?.let {
-                                    state.deleteNote(it)
-                                    snackbarMessage = "Nota eliminata"
-                                }
+                        state.selectedEntityId?.let {
+                            state.deleteEntity(it)
+                            snackbarMessage = "Entità eliminata"
+                        }
+                        state.selectedRelationshipId?.let {
+                            state.deleteRelationship(it)
+                            snackbarMessage = "Relazione eliminata"
+                        }
+                        state.selectedNoteId?.let {
+                            state.deleteNote(it)
+                            snackbarMessage = "Nota eliminata"
+                        }
                         true
                     }
                     keyEvent.isCtrlPressed && keyEvent.key == Key.Plus -> {
