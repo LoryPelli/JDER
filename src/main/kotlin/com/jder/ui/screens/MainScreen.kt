@@ -390,7 +390,6 @@ fun MainScreen(
                         onDeleteConnection = { entityId ->
                             state.selectedRelationshipId?.let {
                                 state.deleteConnection(it, entityId)
-                                state.deleteConnection(it, entityId)
                                 snackbarMessage = "Connessione eliminata"
                             }
                         },
@@ -416,8 +415,8 @@ fun MainScreen(
             EntityPropertiesDialog(
                 entity = e,
                 onDismiss = { showEntityDialog = false },
-                onSave = {
-                    state.updateEntity(e.id) { it }
+                onSave = { updatedEntity ->
+                    state.updateEntity(e.id) { updatedEntity }
                     showEntityDialog = false
                 }
             )
@@ -429,8 +428,8 @@ fun MainScreen(
             RelationshipPropertiesDialog(
                 relationship = r,
                 onDismiss = { showRelationshipDialog = false },
-                onSave = {
-                    state.updateRelationship(r.id) { it }
+                onSave = { updatedRelationship ->
+                    state.updateRelationship(r.id) { updatedRelationship }
                     showRelationshipDialog = false
                 }
             )
